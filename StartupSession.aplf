@@ -11,7 +11,7 @@
  ;⎕IO;⎕ML ⍝ sysvars
  ;Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin ⍝ fns
  ;win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type ⍝ vars
- ;exe;parent;load;msg;dl;ref;fullns;runs;run;linkFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt
+ ;exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds
 
  ⎕IO←⎕ML←1
 
@@ -56,6 +56,9 @@
          :If 0=≢dl←Env'DYALOGLINK'
              dl←dyalog
          :EndIf
+         :If 0=≢ds←⊃⎕NPARTS Env'DYALOGSTARTUP'
+             ds←dyalog
+         :EndIf
          :If ~(⊂dskl←Env'DYALOGSTARTUPKEEPLINK')∊,¨'' '0' '1'
              ⍞←'Configuration parameter DYALOGSTARTUPKEEPLINK is "',dskl,'" but must be "0" or "1". Press Enter.'
              {}⍞ ⋄ ⎕OFF 1
@@ -67,18 +70,18 @@
      :EndSection
 
      :Section a_Populate_Session_Object from $DYALOG/StartupSession/*/*.apl?
-         :For pre :In 'Link' 'Dyalog'
-             dir←dl,'/StartupSession/',pre
+         :For pre dir :InEach ('Link' 'Dyalog')(dl ds)
+             dir,←'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
-             linkFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
+             preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
              :If dskl
-                 {2 ref.⎕FIX'file://',⍵}¨linkFiles
+                 {2 ref.⎕FIX'file://',⍵}¨preFiles
                  opts←⎕SE.Link.U.DefaultOpts ⍬
                  'opts'⎕NS'dir' 'ns'
                  opts.⎕DF 1⌽'][',⎕SE.Link.U.LinkDisplay opts
                  ⎕SE.Link.(U.SetLinks Links,Watcher.Watch)opts
              :Else
-                 {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨linkFiles
+                 {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨preFiles
              :EndIf
          :EndFor
 
