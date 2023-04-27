@@ -230,6 +230,7 @@
               quadAssns←'{⍵.(⍵',(∊'⊣',¨quadMask/assns),')}'
               names/⍨←~quadMask
               assns/⍨←~quadMask
+              names,←(0=≢names)/⊂''
               ∊'({'(assns,¨'⋄')quadAssns'⎕NS'('(, '∘,¨q,¨names,¨⊂q')')'}⍬)'
           }
      
