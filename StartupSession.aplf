@@ -78,7 +78,11 @@
                  {2 ref.⎕FIX'file://',⍵}¨preFiles
                  opts←⎕SE.Link.U.DefaultOpts ⍬
                  'opts'⎕NS'dir' 'ns'
+                 opts.restored←0
                  opts.⎕DF 1⌽'][',⎕SE.Link.U.LinkDisplay opts
+                 :If 0=⎕NC'⎕SE.Link.Links'
+                     ⎕SE.Link.Links←⍬
+                 :EndIf
                  ⎕SE.Link.(U.SetLinks Links,Watcher.Watch)opts
              :Else
                  {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨preFiles
@@ -119,7 +123,7 @@
                          fulldir←dir NJoin subdir
                          :If dskl ⍝ proper link or just import?
                              :Trap 0
-                                 {}'(overwrite:1)'⎕SE.Link.Create fullns fulldir
+                                 {}⎕SE.Link.Create fullns fulldir
                                  run,←⊂fullns fulldir
                              :Else
                                  ⍞←'Could not link "',fulldir,'" with ',fullns,': ',FullMsg ⎕DMX
@@ -151,7 +155,7 @@
          :If 3=⎕NC'⎕SE.Link.SECreate'
              {}⎕SE.Link.SECreate
          :Else
-             ⎕EX'⎕SE.Link.Links' ⍝ In case the session was saved with links and there is no Link.SECreate
+             {}⎕SE.Link.U.GetLinks ⍝ In case the session was saved with links and there is no Link.SECreate
          :EndIf
      :EndSection
 
