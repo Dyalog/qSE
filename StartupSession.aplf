@@ -53,15 +53,20 @@
          loadSALT←~'1'∊Env'DYALOGSTARTUPNOSALT'
          home←NoSlash Env'HOME'
          envVars←Env¨'DYALOGSTARTUPSE' 'DYALOGSTARTUPWS'
+
+         ⍝ Exit code 1 means startup fail due to missing or invalid resource
          :If 0=≢dl←Env'DYALOGLINK'
              dl←dyalog
+         :ElseIf ~⎕NEXISTS dl
+             ⍞←'Cannot read DYALOGLINK ("',dl,'"). Press Enter.'
+             ⎕DL 5 ⋄ ⎕OFF 1
          :EndIf
          :If 0=≢ds←⊃⎕NPARTS Env'DYALOGSTARTUP'
              ds←dyalog
          :EndIf
          :If ~(⊂dskl←Env'DYALOGSTARTUPKEEPLINK')∊,¨'' '0' '1'
              ⍞←'Configuration parameter DYALOGSTARTUPKEEPLINK is "',dskl,'" but must be "0" or "1". Press Enter.'
-             {}⍞ ⋄ ⎕OFF 1
+             ⎕DL 5 ⋄ ⎕OFF 1
          :Else
              dskl∊⍨←'1'
          :EndIf
