@@ -121,8 +121,7 @@
                  dirs←1 Dir dir
                  :For subdir :In 2⊃¨⎕NPARTS dirs
                      :Select fullns←root,⍥⍕'.',subdir
-                     :Case '⎕SE.Link' ⍝ already loaded
-                     ⍝ Though ⎕SE.Dyalog was also loaded, we do it again to be recursive
+                     :CaseList '⎕SE.Link' '⎕SE.Dyalog' ⍝ already loaded
                      :Else
                          ⎕EX fullns
                          fulldir←dir NJoin subdir
