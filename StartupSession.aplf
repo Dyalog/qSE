@@ -75,7 +75,7 @@
      :EndSection
 
      :Section a_Populate_Session_Object from $DYALOG/StartupSession/*/*.apl?
-         :For pre dir :InEach ('Link' 'Dyalog')(dl ds)
+         :For pre dir :InEach ('Link' 'Dyalog')(∊¨1 ⎕NPARTS dl ds)
              dir,←'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
@@ -124,7 +124,7 @@
                      :Case '⎕SE.Link' ⍝ already loaded
                      ⍝ Though ⎕SE.Dyalog was also loaded, we do it again to be recursive
                      :Else
-                         ⎕EX fullns~⍥⊂'⎕SE.Dyalog' ⍝ we need stuff there
+                         ⎕EX fullns
                          fulldir←dir NJoin subdir
                          :If dskl ⍝ proper link or just import?
                              :Trap 0
