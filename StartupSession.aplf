@@ -75,8 +75,8 @@
      :EndSection
 
      :Section a_Populate_Session_Object from $DYALOG/StartupSession/*/*.apl?
-         :For pre dir :InEach ('Link' 'Dyalog')(∊¨1 ⎕NPARTS dl ds)
-             dir,←'/StartupSession/',pre
+         :For pre dir :InEach ('Link' 'Dyalog')(dl ds)
+             dir←∊1⎕NPARTS dir,'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
              :If dskl
