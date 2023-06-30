@@ -1,4 +1,4 @@
-﻿:NameSpace Utils ⍝ V1.53
+:NameSpace Utils ⍝ V1.54
 ⍝ Namespace containing :Includable utility functions
 ⍝ 2015 11 12 Adam: Auto version + format & layout now handle matrices
 ⍝ 2016 05 29 DanB: added setupKeys and double quotes for JS
@@ -36,6 +36,7 @@
 ⍝ 2023 05 16 Adam: [19376] specify dll if .NET "Core"
 ⍝ 2023 05 25 Adam: Fix typo in nkds
 ⍝ 2023 05 30 Adam: Staticise ⎕USING as the Core value works in Framework
+⍝ 2023 06 30 Adam: Dynamicise ⎕USING again as the Core value generates error messages in Framework
 
     :Section General
     ⎕IO←⎕ML←1
@@ -97,7 +98,7 @@
               ⍵
           }
           :If loc≡'Registry'
-              ⎕USING←'Microsoft.Win32,Microsoft.Win32.Registry'
+              ⎕USING←'Microsoft.Win32',',Microsoft.Win32.Registry'/⍨1=⊃2250⌶0 ⍝ .NET Core
               hk←Registry⍎'_(\w)'⎕R'\u1'⊃'^HKEY(_\w+)'⎕S'\l1'⊃4070⌶0
               (key name)←param⊂⍨⍸⍣¯1⊢1,⌈/⍸'\'='\',param
               sk←hk.OpenSubKey⊂'\'(⍳⍨↓,⍨,key⍨)⊃4070⌶0
