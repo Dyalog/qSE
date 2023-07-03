@@ -88,6 +88,7 @@
                  opts←⎕SE.Link.U.DefaultOpts ⍬
                  'opts'⎕NS'dir' 'ns'
                  opts.restored←0
+                 opts.flagged←⍬
                  opts.⎕DF 1⌽'][',⎕SE.Link.U.LinkDisplay opts
                  :If 0=⎕NC'⎕SE.Link.Links'
                      ⎕SE.Link.Links←⍬
