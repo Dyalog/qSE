@@ -89,6 +89,7 @@
                  'opts'⎕NS'dir' 'ns'
                  opts.restored←0
                  opts.flagged←⍬
+                 opts.singlefile←0
                  opts.⎕DF 1⌽'][',⎕SE.Link.U.LinkDisplay opts
                  :If 0=⎕NC'⎕SE.Link.Links'
                      ⎕SE.Link.Links←⍬
@@ -116,7 +117,8 @@
 
          paths←1⍴'/StartupSession/' '/StartupWorkspace/'Path¨envVars ⍝ "1⍴" disables ws
          roots←1⍴⎕SE #                                               ⍝ "1⍴" disables #
-
+                                                                     ⍝ ↓ if envVar set, then we don't know what's what
+         (⍎'⎕SE.Dyalog.StartupSession'⎕NS ⍬).(Dyalog VerAgno VerSpec AllPaths)←0@((×≢⊃envVars)×2-≡¨),∘⊂⍨⊃paths
          as←AutoStatus 0
          run←0⍴⊂''
          :For path root :InEach paths roots
