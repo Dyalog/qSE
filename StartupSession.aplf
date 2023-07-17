@@ -118,7 +118,7 @@
          paths←1⍴'/StartupSession/' '/StartupWorkspace/'Path¨envVars ⍝ "1⍴" disables ws
          roots←1⍴⎕SE #                                               ⍝ "1⍴" disables #
                                                                      ⍝ ↓ if envVar set, then we don't know what's what
-         (⍎'⎕SE.Dyalog.StartupSession'⎕NS ⍬).(Dyalog VerAgno VerSpec AllPaths)←(0 0 0⊣⍣(×≢⊃envVars)⊢paths),⍬⍴paths
+         (⍎'⎕SE.Dyalog.StartupSession'⎕NS ⍬).(Dyalog VerAgno VerSpec AllPaths)←(0 0 0⊣⍣(×≢⊃envVars)⊃paths),⍬⍴paths
          as←AutoStatus 0
          run←0⍴⊂''
          :For path root :InEach paths roots
