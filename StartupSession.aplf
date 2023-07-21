@@ -10,7 +10,7 @@
 
  ;⎕IO;⎕ML ⍝ sysvars
  ;Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin ⍝ fns
- ;win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type ⍝ vars
+ ;win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep ⍝ vars
  ;exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds
 
  ⎕IO←⎕ML←1
@@ -26,8 +26,11 @@
      Cut←≠⊆⊢
      FullMsg←{⍵.(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⊆⍺}Message{⍵,⍺,⍨': '/⍨×≢⍺}⊃⍬⍴DM,⊂'')}
      Path←{
-         ×≢⍵:⍵ Cut⍨':;'⊃⍨1+win ⍝ split on OS separator
-         defaults,¨⊂⍺
+         default←defaults,¨⊂⍺
+         append←osSep=⊃⍵
+         empty←0=≢⍵
+         user←osSep Cut ⍵
+         user,⍨default/⍨append∨empty
      }
      Dir←{ ⍝ ⍺=1:dirs; ⍺=2:files
          pats←⍺⊃(,⊂'/*')('/*.dyalog' '/*.apl?')
@@ -44,6 +47,7 @@
      :Section __Read_Environment
          (os ver type exe)←# ⎕WG'APLVersion'
          win←'Windows'≡7↑os
+         osSep←':;'⊃⍨1+win
          dyalog←NoSlash Env'DYALOG'
          :If 0∊⍴salt←NoSlash Env'SALT'
              ⍝ If it isn't it should be found here:
@@ -118,7 +122,7 @@
          paths←1⍴'/StartupSession/' '/StartupWorkspace/'Path¨envVars ⍝ "1⍴" disables ws
          roots←1⍴⎕SE #                                               ⍝ "1⍴" disables #
                                                                      ⍝ ↓ if envVar set, then we don't know what's what
-         (⍎'⎕SE.Dyalog.StartupSession'⎕NS ⍬).(Dyalog VerAgno VerSpec AllPaths)←(0 0 0⊣⍣(×≢⊃envVars)⊃paths),⍬⍴paths
+         (⍎'⎕SE.Dyalog.StartupSession'⎕NS ⍬).(Dyalog VerAgno VerSpec AllPaths)←(0 0 0⊣⍣((×⍤≢∧osSep≠⊃)⊃envVars)⊃paths),⍬⍴paths
          as←AutoStatus 0
          run←0⍴⊂''
          :For path root :InEach paths roots
