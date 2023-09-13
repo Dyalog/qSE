@@ -1,3 +1,0 @@
-sysVars←sysVars
-sysVars←'⎕CT' '⎕DIV' '⎕IO' '⎕ML' '⎕PP' '⎕RL' '⎕RTL' '⎕WX' '⎕USING' '⎕AVU' '⎕DCT' '⎕FR'
-

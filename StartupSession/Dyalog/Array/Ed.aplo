@@ -1,3 +1,0 @@
- Ed←{ ⍝ Skip ⍺⍺ QA if interpreter skips lines that look like invalid ∇ Editor directives
-     </⍋(18 1)(⊃⌽'.'⎕VFI 1⊃# ⎕WG'APLVersion'):⍺⍺ ⍵
- }

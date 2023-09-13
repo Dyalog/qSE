@@ -1,5 +1,0 @@
- Inline←{
-     caller←serialise.FirstNs ⍵,⊃⎕RSI
-     aa←⍺⍺
-     caller Deserialise 1↓∊(⎕UCS 13),¨'^( *[\w∆⍙]+ *← *)?{( |\R)*|( |\R)*}\R*$'⎕R''⍠'Mode' 'D'⎕NR'aa'
- }

@@ -1,5 +1,0 @@
- r←QA
-    ⍝ fails under 18.0 because of mantis 18132
- r←SerialiseQA 1
- r∧←DeserialiseQA 1
- r∧←RoundtripQA 1

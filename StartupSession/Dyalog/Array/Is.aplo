@@ -1,8 +1,0 @@
- Is←{
-     0::'MISMATCH'⎕SIGNAL 999
-     a←Serialise ⍺⍺ Inline 1
-     a≡Serialise ⍵:
-     a≡Serialise ⎕JSON ⍵:
-     ∧/⍵(1∊⍷)¨⊂↑a:
-     !#
- }
