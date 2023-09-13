@@ -1,0 +1,6 @@
+ debug←debug
+ :If 0=⎕NC'DEBUG'
+     debug←0
+ :Else
+     debug←DEBUG
+ :EndIf

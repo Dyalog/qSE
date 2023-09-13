@@ -1,0 +1,143 @@
+ r←RoundtripQA stop_on_error;Check;Is;array;arrays;mask;ns;shapes;⎕FR;⎕IO;⎕TRAP
+ ⎕IO←0
+ ⎕TRAP←(~stop_on_error)/⊂999 'C' '→r←0'
+ Is←{
+     Check←'MISMATCH'⎕SIGNAL 999/⍨≢
+          ⍝ identical nss don't match, so we compare the generated notation:
+     9∊{⊃⎕NC'⍵'}¨∊⍵:(Serialise ⍵)Check Serialise Deserialise Serialise ⍵
+     ⍵ Check Deserialise Serialise ⍵
+ }
+
+ :Section numbers
+     ns←⎕NS ⍬
+     :For ns.⎕FR :In 645 1287
+         Check←ns.{'MISMATCH'⎕SIGNAL 999/⍨⍵≢##.Deserialise ##.Serialise ⍵}
+         Check ns.(123)
+         Check ns.(○1)  ⍝ issue #272
+         Check ns.(0.1J0.1)
+     :EndFor
+ :EndSection
+
+
+ :Section scalars
+     Is'a'
+     Is 42
+     Is ⎕NULL
+     Is ⎕UCS 0
+     Is ⎕UCS 13
+ :EndSection
+ :Section vectors
+     Is,42
+     ⎕FR←1287 ⋄ Is{(¯1*?⍵⍴2)×(*14000×¯1+2×?⍵⍴0)}10  ⍝ 1287
+     ⎕FR←645 ⋄ Is{(¯1*?⍵⍴2)×(*700×¯1+2×?⍵⍴0)}10     ⍝ 645
+     Is{⍺+0J1×⍵}⌿{(¯1*?⍵⍴2)×(*700×¯1+2×?⍵⍴0)}2 10   ⍝ 1289
+     Is 1=?100⍴2                                    ⍝ 11
+     Is?100⍴100                                     ⍝ 83
+     Is?100⍴32000                                   ⍝ 163
+     Is?100⍴2000000000                              ⍝ 323
+     Is'Hello',⎕AV[256?256]
+     Is(1 2 3 'Hello')(4 5 6 'World')
+     Is(1 2 3 'Hello')(4 5 6 'World')
+     Is↓4 2⍴⍳8
+     Is'Three' 'Blind' 'Mice'
+ :EndSection
+ :Section Matrices
+     Is 2 3⍴⍳6
+     Is⍉⍪⍳4
+     Is⍉⍪⍳4
+     Is 3 5⍴'ThreeBlindMice '
+     Is⍪1
+     Is 1 2(⍪1)
+ :EndSection
+ :Section Combo
+     Is{
+         _←⍉⍪0 0 1
+         _⍪←1 0 1
+         _⍪←0 1 1
+         r←⊂_
+         _←⍉⍪0 1 1
+         _⍪←1 1 0
+         _⍪←0 1 0
+         r,←⊂_
+         _←⍉⍪0 1 1 1
+         _⍪←1 1 1 0
+         r,←⊂_
+         _←⍉⍪0 1 1 0
+         _⍪←1 0 0 1
+         _⍪←0 1 1 0
+         r,←⊂_
+         r
+     }⍬
+
+     Is{
+         e←⍉⍪0 'OK'
+         e⍪←1 'WS FULL'
+         e⍪←2 'SYNTAX ERROR'
+         e⍪←3 'INDEX ERROR'
+         e⍪←4 'RANK ERROR'
+         e
+     }⍬
+     Is 2 3⍴'a'(⊂1 2)
+     Is 3 3⍴(,¨'1' '0' '1')
+     Is'Hello'('' '⍝World:')
+     Is'AB''C',⊂'DE'
+     Is'ABC'(,⊂⊂'')
+     Is'A'(,⊂⊂'')
+ :EndSection
+
+ :Section High Rank
+     Is 1 1 2 3⍴⍳6     ⍝ issue #254
+     Is 3 2 1 1⍴⍳6     ⍝ issue #254
+     Is 2 3 4 5⍴⍳120   ⍝ issue #254
+     Is⊂[3 4 5]⎕AV[?1 2 3 1 5 6⍴256]      ⍝ issue #254
+ :EndSection
+
+ :Section Large Arrays                  ⍝ (more than 4096 constants) - issue #255
+     Is⊂[2 3]?50 100 2 3⍴100              ⍝ Numeric is straightforward
+     Is⊂[3 4 5]⎕AV[?50 10 10 1 2 3⍴256]   ⍝ Text gets functional headers produced by Parse
+ :EndSection
+
+ :Section Empty
+     Is ⍬
+     Is,⊂⍬
+     Is 0⍴⊂⍬
+     Is 0⍴⊂⊂⍬
+     Is 0⍴⊂0⍴⊂⍬
+     Is⍉⍪⍬
+     Is⍪⍬
+     Is 0⍴⊂⍉⍪⍬
+     Is 0⍴⊂⍪⍬
+ :EndSection
+
+ :Section Namespace
+     Is ⎕JSON'{}'
+     Is ⎕JSON'{}'
+     Is ⎕JSON'[{},{}]'
+     Is ⎕JSON'{"a":[0,1,2],"b":9}'
+     Is{
+         ⍺←⎕NS ⍬
+         ⍺.p←{⍺+⍵}
+         ⍺.m←{⍺-⍵}
+         ⍺
+     }⍬
+     Is ⎕JSON'{"v":[[1,2],3]}'
+     Is ⎕JSON'{"v":[[1,2],3]}'
+     Is ⎕JSON'{"v":[[1,2],3]}'
+     Is ⎕JSON'[{}]'
+     Is ⎕JSON'{"n":{}}'
+ :EndSection
+
+ :Section Deep arrays
+     arrays←⎕NULL((⎕NS ⍬).(⎕THIS⊣var←(idiom←{⍵[⍋⍵]})(foo←{,⍵})123))(?256⍴0)(⎕AV[256?256])
+     shapes←⍬ 0 1 256(0 0)(0 256)(256 0)(16 16)
+     shapes,←(0 1 256)(0 256 1)(1 0 256)(1 256 0)(256 1 0)(256 0 1)
+     shapes,←(0 0 0 0 0 0)(0 1 2 3 4 5)(5 4 3 2 1 0)(0 0 2 3 0 0)(2 0 0 0 0 3)
+     shapes,←(1 2 3 4 5)(5 4 3 2 1)
+     mask←~¯1⌽4↑⍤0⊢0∊¨shapes  ⍝ empty arrays with namespaces are not supported (they can't be compared with ≡ anyways)
+     arrays←(,mask)/(,shapes∘.⍴arrays)
+     :For array :In arrays
+         Is array
+     :EndFor
+     Is arrays
+ :EndSection
+ r←1

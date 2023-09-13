@@ -1,0 +1,139 @@
+:Namespace serialise
+    ⎕FR←1287 ⋄ ⎕PP←34
+
+
+    :Section UTIL
+    (sp qu os cs or cr oc cc ec di nl)←' ''[](){}⊂⋄',⎕UCS 13
+      Clean←{
+          t←'^'''',' ',''''$'⎕R''⊢⍵
+          one←2=+/'()'∊⍨'''[^'']+'''⎕R''⊢t
+          strip←one∧'()'≡(⊃,⊢/)t
+          (strip↓⌽)⍣2⊢t
+      }
+      Esc←{
+          Sub←{
+              cont←⍵.Lengths[3]
+              nums←⍕⎕UCS ⍵.Match↓⍨-cont
+              ''',',(cont⍴'('),'⎕UCS ',nums,cont/'),''',⊃⌽⍵.Match
+          }
+          '([\x00-\x1F\x7F-\x9F\x{2028}\x{2029}\x{FEFF}\x{FFF9}-\x{FFFF}]+)(.?)'⎕R Sub⍠'Mode' 'D'⊢⍵
+      }
+    Unempty←⊢↑⍨1⌈≢
+      Empty←{
+          ⍵,⍨'0⌿'/⍨Lead0 ⍺
+      }
+      _Sub_←{
+          (o c)←⍵⍵
+          inner←∊⍺⍺ Unempty ⍵
+          ⍵ Empty o,nl,inner,c
+      }
+    Join←{⍺←nl ⋄ ¯1↓∊⍵,¨⍺}
+      _Paren_←{
+          res←⍵⍵ ⍵
+          ⍺⍺ res:or,res,cr
+          res
+      }
+    :EndSection
+    :Section REPR
+      Repr←{
+          ⍵≡⍬:'⍬'
+          ⍵≡0⍴⎕NULL:'0⌿⎕NULL'
+          Char ⍵:Clean Esc qu,(qu ⎕R qu qu⊢⍵),qu
+          Num ⍵:⍕⍵
+          Null ⍵:'⎕NULL'⍴⍨5×≢⍵
+          ~Scal ⍵:⎕SIGNAL 999
+          Ns ⍵
+      }
+    ∇ repr←{caller}Ns ref;name;names;code;ser;ind;xr;nr;nc
+      :If 900⌶⍬
+          caller←⊃⎕RSI
+      :Else
+          caller←serialise.FirstNs caller,⊃⎕RSI
+      :EndIf
+      :Select nc←⎕NC⊂'ref'
+      :CaseList 9.1 9.4 9.5
+          :Trap 0
+              repr←or,(Join ⎕SRC ref),nl,cr
+          :Else
+              repr←or nl
+     
+              names←##.sysVars/⍨≢⌿ref ref.##∘.⍎##.sysVars
+              names,←ref.⎕NL-⍳9
+     
+              :For name :In names
+                  code←Join ref.⎕NR name
+     
+                  :Select ref.⎕NC⊂name
+                  :CaseList 3.1 4.1
+                      repr,←name,':(∇',code,nl,'∇)'
+                  :CaseList 3.2 4.2
+                      repr,←1↓':'@(<\'←'=⊢)code
+                  :CaseList 3.3 4.3
+                      xr←183 ref.⌶name
+                      nr←ref.⎕NR name
+                      repr,←name,':',{1↓¯1↓⍵}⍣(⍬≢⍴xr)⊢xr(caller Tacit)nr
+                  :Else
+                      repr,←name,':',caller Ser ref⍎name
+                  :EndSelect
+                  repr,←nl
+              :EndFor
+     
+              repr,←cr
+          :EndTrap
+      :Else
+          11 ⎕SIGNAL⍨'Cannot represent ','instance' 'unscripted class' 'unscripted interface' 'external class' 'external interface' 'unknown object'⊃⍨9.2 9.4 9.5 9.6 9.7⍳nc
+      :EndSelect
+    ∇
+      Tacit←{
+          2 9∊⍨⊂⍺:⍺⍺ Ser ⍵        ⍝ array
+          ⍬≢⍴⍺:∊or,(⍺ ∇¨⍵),(']'/⍨'['≡2⊃⍵),cr  ⍝ derv
+          (3 1)(4 1)∊⍨⊂⍺,≢⍵:⍵  ⍝ primitive
+          0=≢⍵:11 ⎕SIGNAL⍨'Cannot represent external or locked functions'
+          code←Join⊆⍵
+          '}'=⊃⌽⊃⌽⍵:code       ⍝ dfn
+          '(∇',code,nl,'∇)'    ⍝ tradfn
+      }
+    :EndSection
+    :Section TYPE
+    Char←0 2∊⍨10|⎕DR
+    Num←2|⎕DR
+    Null←∧/⎕NULL≡¨⊢  ⍝ can't use ∧.= because = is pervasive on deep arrays
+    Ptr←6=10|⎕DR
+    Basic←Char∨Num∨Null
+    FirstNum←Num¨⊃⍤/⊢
+        FirstNs←{9∊⎕NC'⍵'}¨⊃⍤/⊢
+    :EndSection
+    :Section PROP
+    Simple←{1=≡,⍵}
+    Scal←⍬≡⍴
+    Nested←{1<|≡⍵}
+    Vec1←{(,1)≡⍴⍵}
+    HiRank←{1<≢⍴⍵}
+    Vec←{1=≢⍴⍵}
+    Mat←{2=≢⍴⍵}
+    String←Simple∧Char∧Vec∨Scal
+    Table←Mat>0∊(String∨Simple∧Scal∧Num∨Null)¨
+    Lead0←0=≢
+    Any0←0∊⍴
+    Col1←{1=⊃⌽⍴⍵}
+    :EndSection
+      Ser←{
+          ⍺←⊃⎕RSI
+          (Simple∧Scal)⍵:Repr ⍵
+          Scal ⍵:ec,⍺ ∇⊃⍵
+     
+          Self←⊂nl,⍨∇
+     
+          (Any0<Num∧Table)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT ⍵
+          (Any0<Table>Col1)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}0 1↓⊃,/' ',¨↑¨↓⍉(∨/'⎕UCS'⍷'''[^'']+'''⎕R'')_Paren_(⍺∘∇)¨⍵
+          HiRank ⍵:Self⍤¯1 _Sub_ os cs⊢⍵
+          Nested ⍵:Self¨_Sub_ or cr⊢⍵
+     
+          Vec1 ⍵:or,(⍺ ∇⊃⍵),di cr
+     
+          (Basic∨Scal)⍵:Repr ⍵
+          ∧/Basic¨⍵:sp Join(6≤≢)_Paren_ Repr¨⍵
+     
+          Self¨_Sub_ or cr⊢⍵ ⍝ hetero
+      }
+:EndNamespace
