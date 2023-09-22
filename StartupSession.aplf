@@ -235,6 +235,9 @@
      :EndSection
 
      {}AutoStatus as
+
+     ⎕SE.SALTUtils.USetup'init' 0
+
      ok←1
  :Else
      ok←0
