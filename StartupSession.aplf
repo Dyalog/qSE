@@ -136,16 +136,19 @@
                      :Else
                          ⎕EX fullns
                          fulldir←dir NJoin subdir
+                         opts←⎕SE.Link.U.DefaultOpts ⍬
+                         opts.codeExtensions~←'apl' 'mipage'
                          :If dskl ⍝ proper link or just import?
                              :Trap 0
-                                 {}⎕SE.Link.Create fullns fulldir
+                                 {}opts ⎕SE.Link.Create fullns fulldir
                                  run,←⊂fullns fulldir
                              :Else
                                  ⍞←'Could not link "',fulldir,'" with ',fullns,': ',FullMsg ⎕DMX
                              :EndTrap
                          :Else
                              :Trap 0
-                                 {}'(overwrite:1)'⎕SE.Link.Import fullns fulldir
+                                 opts.overwrite←1
+                                 {}opts ⎕SE.Link.Import fullns fulldir
                                  run,←⊂fullns fulldir
                              :Else
                                  ⍞←'Could not import "',fulldir,'" to ',fullns,': ',FullMsg ⎕DMX
