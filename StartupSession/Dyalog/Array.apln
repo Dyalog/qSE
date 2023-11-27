@@ -13,7 +13,7 @@
         (sp qu os cs or cr oc cc ec di nl)←' ''[](){}⊂⋄',⎕UCS 13
           Clean←{
               t←'^'''',' ',''''$'⎕R''⊢⍵
-              one←2=+/'()'∊⍨'''[^'']+'''⎕R''⊢t
+              one←2=+/'()'∊⍨'''[^'']*'''⎕R''⊢t
               strip←one∧'()'≡(⊃,⊢/)t
               (strip↓⌽)⍣2⊢t
           }
@@ -132,7 +132,7 @@
               Self←⊂nl,⍨∇
          
               (Any0<Num∧Table)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT ⍵
-              (Any0<Table>Col1)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}0 1↓⊃,/' ',¨↑¨↓⍉(∨/'⎕UCS'⍷'''[^'']+'''⎕R'')_Paren_(⍺∘∇)¨⍵
+              (Any0<Table>Col1)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}0 1↓⊃,/' ',¨↑¨↓⍉(∨/'⎕UCS'⍷'''[^'']*'''⎕R'')_Paren_(⍺∘∇)¨⍵
               HiRank ⍵:Self⍤¯1 _Sub_ os cs⊢⍵
               Nested ⍵:Self¨_Sub_ or cr⊢⍵
          
@@ -159,7 +159,7 @@
      
           split←{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT code
      
-          1∊⍺:'''[^'']+''' '([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
+          1∊⍺:'''[^'']*''' '([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
      
           spaces←⌊|num+2×0=num
           code←'''[^'']*'''⎕R'⋄'⊢code                  ⍝ remove quoted text first
