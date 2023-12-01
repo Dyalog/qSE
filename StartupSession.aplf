@@ -98,7 +98,7 @@
                  :If 0=⎕NC'⎕SE.Link.Links'
                      ⎕SE.Link.Links←⍬
                  :EndIf
-                 ⎕SE.Link.(U.SetLinks Links,Watcher.Watch)opts
+                 ⎕SE.Link.(U.SetLinks Links,{0::⍬ ⋄ Watcher.Watch ⍵})opts ⍝ Watcher might fail
              :Else
                  {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨preFiles
              :EndIf
