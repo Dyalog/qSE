@@ -143,7 +143,7 @@
                                  {}opts ⎕SE.Link.Create fullns fulldir
                                  run,←⊂fullns fulldir
                              :Else
-                                 ⍞←'Could not link "',fulldir,'" with ',fullns,': ',FullMsg ⎕DMX
+                                 ⍞←('Could not link "',fulldir,'" with ',fullns,': ',FullMsg ⎕DMX),⎕UCS 13
                              :EndTrap
                          :Else
                              :Trap 0
@@ -151,7 +151,7 @@
                                  {}opts ⎕SE.Link.Import fullns fulldir
                                  run,←⊂fullns fulldir
                              :Else
-                                 ⍞←'Could not import "',fulldir,'" to ',fullns,': ',FullMsg ⎕DMX
+                                 ⍞←('Could not import "',fulldir,'" to ',fullns,': ',FullMsg ⎕DMX),⎕UCS 13
                              :EndTrap
                          :EndIf
                      :EndSelect
