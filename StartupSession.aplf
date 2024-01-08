@@ -240,6 +240,7 @@
      {}AutoStatus as
 
      ⎕SE.SALTUtils.USetup'init' 0
+     {}⎕SE.UCMD'box' ⍝ initialise output space so toolbar button works
 
      ok←1
  :Else
