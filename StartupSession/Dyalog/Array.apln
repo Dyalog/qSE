@@ -3,7 +3,7 @@
     DEBUG←1
 
     sysVars←'⎕CT' '⎕DIV' '⎕IO' '⎕ML' '⎕PP' '⎕RL' '⎕RTL' '⎕WX' '⎕USING' '⎕AVU' '⎕DCT' '⎕FR'
-    L←{1=⊃⍋18(⊃⌽'.'⎕VFI 2⊃#⎕WG'APLVersion'):⎕C ⍵ ⋄ 819⌶⍵}
+
 
     :Namespace serialise
         ⎕FR←1287 ⋄ ⎕PP←34
@@ -40,6 +40,7 @@
               ⍺⍺ res:or,res,cr
               res
           }
+
         :EndSection
         :Section REPR
           Repr←{
@@ -52,7 +53,7 @@
               Ns ⍵
           }
         ∇ repr←{caller}Ns ref;name;names;code;ser;ind;xr;nr;nc
-          :If 900⌶⍬
+          :If Monadic ⍬
               caller←⊃⎕RSI
           :Else
               caller←serialise.FirstNs caller,⊃⎕RSI
@@ -76,7 +77,7 @@
                       :CaseList 3.2 4.2
                           repr,←1↓':'@(<\'←'=⊢)code
                       :CaseList 3.3 4.3
-                          xr←183 ref.⌶name
+                          xr←ref ∆XR name
                           nr←ref.⎕NR name
                           repr,←name,':',{1↓¯1↓⍵}⍣(⍬≢⍴xr)⊢xr(caller Tacit)nr
                       :Else
@@ -157,25 +158,36 @@
           code←caller serialise.Ser ⍵
           ⍺ Bad caller code:'It would not be possible to deserialise the generated array notation'⎕SIGNAL 16
      
-          split←{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT code
+          code Format⍨1∊⍺
+      }
+
+      Format←{
+          Split←{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT
      
-          1∊⍺:'''[^'']*''' '([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
+          'AIX'≢3↑⊃# ⎕WG'APLVersion':Split ⍺ ∆FMTAPLAN Split ⍵  ⍝ Experimental I-beam - do not use!
+     
+          split←Split ⍵
+          ⍺:'''[^'']*''' '([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
      
           spaces←⌊|num+2×0=num
-          code←'''[^'']*'''⎕R'⋄'⊢code                  ⍝ remove quoted text first
+          code←'''[^'']*'''⎕R'⋄'⊢⍵                     ⍝ remove quoted text first
           fmt←⎕FMT'\[[^][]+\]' '\([^)(]+\)'⎕R''⍣≡code  ⍝ remove bracket contents
           delta←(+/'(['∊⍨fmt)-(+/fmt∊')]')
           ind←+\0(⌊+0,¯1↓⌈)delta
           ind{⍵,⍨⍺⍴''}¨split
       }
 
-
-
       Deserialise←{ ⍝ Convert text to array
           ⍺←⍬ ⍝ 1=execute expression; 0=return expression
           execute←serialise.FirstNum ⍺,1
           caller←serialise.FirstNs ⍺,⊃⎕RSI
-
+     
+          ⍝ Make normalised simple vector:
+          w←↓⍣(2=≢⍴⍵)⊢⍵                  ⍝ if mat, make nested
+          w←{¯1↓∊⍵,¨⎕UCS 13}⍣(2=|≡w)⊢w   ⍝ if nested, make simple
+     
+          'AIX'≢3↑⊃# ⎕WG'APLVersion':caller ∆APLAN,w
+     
           q←''''
           ⎕IO←0
           SEP←'⋄',⎕UCS 10 13
@@ -213,7 +225,7 @@
               ⍵ ⍝ dfn
           }
      
-          SysVar←(L sysVars)∊⍨' '~¨⍨L∘⊆
+          SysVar←(⎕C sysVars)∊⍨' '~¨⍨⎕C∘⊆
      
           ParseLine←{
               c←⍵⍳':'
@@ -250,9 +262,6 @@
               10::⍺ ExecuteEach ⍵ ⋄ ⍺⍎⍵       ⍝ attempt simple ⍎ and catch LIMIT ERROR
           }
      
-          ⍝ Make normalised simple vector:
-          w←↓⍣(2=≢⍴⍵)⊢⍵                  ⍝ if mat, make nested
-          w←{¯1↓∊⍵,¨⎕UCS 13}⍣(2=|≡w)⊢w   ⍝ if nested, make simple
           w←'''[^'']*''' '⍝.*'⎕R'&' ''⊢w ⍝ strip comments
           w/⍨←{(∨\⍵)∧⌽∨\⌽⍵}33≤⎕UCS w     ⍝ strip leading/trailing non-printables
      
@@ -285,6 +294,12 @@
       }
 
 
+    :Section Sys
+    ∆XR      ←    {⍺.(183⌶)⍵}
+    ∆Monadic ←       {900⌶⍵}
+    ∆APLAN   ←{1 ⍺.(62582⌶)⍵}
+    ∆FMTAPLAN←   {⍺(62583⌶)⍵}
+
       ∆NS←{ ⍝ allows ⎕NS names values
           ⍺←⊢ ⍝ default to unnamed namespace
           11::⎕SIGNAL 11
@@ -299,8 +314,7 @@
       ∆NSinverse←{ ⍝ ⎕NS⍣¯1
           ⍵∘⍎¨'⎕NL-⍳9' '⎕OR¨⎕NL-⍳9' ⍝ names values
       }
-
-
+    :EndSection
 
 
 
@@ -347,14 +361,14 @@
       :EndSection
       :Section vectors
           {
-            (
-             '<>'
-             ''''
-             '"'
-             '$'
-            )
-          }Is (⊂'<>') , '''"$'
-
+              (
+              '<>'
+              ''''
+              '"'
+              '$'
+              )
+          }Is(⊂'<>'),'''"$'
+     
           {(42 ⋄ )}Is,42
      
           {(42
@@ -378,31 +392,31 @@
               ('Three'
               'Blind'
               'Mice')
-          }Is 'Three' 'Blind' 'Mice'
+          }Is'Three' 'Blind' 'Mice'
       :EndSection
       :Section Matrices
           {
-            [
-            1 ''
-            ¯1 ('-'⋄)
-            ]
-          }Is 2 2⍴1 '' ¯1 (,'-')
-
+              [
+              1 ''
+              ¯1('-' ⋄ )
+              ]
+          }Is 2 2⍴1 '' ¯1(,'-')
+     
           {[0 1 2
               3 4 5]
           }Is 2 3⍴⍳6
-
+     
           {[
-            (
-             'short'
-            )
-            (
-             'longer text'
-            )
-            (
-             'longest test text'
-            )]
-          }Is ⍪'short' 'longer text' 'longest test text'
+              (
+              'short'
+              )
+              (
+              'longer text'
+              )
+              (
+              'longest test text'
+              )]
+          }Is⍪'short' 'longer text' 'longest test text'
      
           {[ ⋄ 0 1 2 3]
           }Is⍉⍪⍳4
