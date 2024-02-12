@@ -3,7 +3,7 @@
     DEBUG←1
 
     sysVars←'⎕CT' '⎕DIV' '⎕IO' '⎕ML' '⎕PP' '⎕RL' '⎕RTL' '⎕WX' '⎕USING' '⎕AVU' '⎕DCT' '⎕FR'
-
+    string←'''[^'']*'''
 
     :Namespace serialise
         ⎕FR←1287 ⋄ ⎕PP←34
@@ -13,7 +13,7 @@
         (sp qu os cs or cr oc cc ec di nl)←' ''[](){}⊂⋄',⎕UCS 13
           Clean←{
               t←'^'''',' ',''''$'⎕R''⊢⍵
-              one←2=+/'()'∊⍨'''[^'']*'''⎕R''⊢t
+              one←2=+/'()'∊⍨##.string ⎕R''⊢t
               strip←one∧'()'≡(⊃,⊢/)t
               (strip↓⌽)⍣2⊢t
           }
@@ -53,7 +53,7 @@
               Ns ⍵
           }
         ∇ repr←{caller}Ns ref;name;names;code;ser;ind;xr;nr;nc
-          :If Monadic ⍬
+          :If ##.∆Monadic ⍬
               caller←⊃⎕RSI
           :Else
               caller←serialise.FirstNs caller,⊃⎕RSI
@@ -133,7 +133,7 @@
               Self←⊂nl,⍨∇
          
               (Any0<Num∧Table)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT ⍵
-              (Any0<Table>Col1)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}0 1↓⊃,/' ',¨↑¨↓⍉(∨/'⎕UCS'⍷'''[^'']*'''⎕R'')_Paren_(⍺∘∇)¨⍵
+              (Any0<Table>Col1)⍵:Join os,cs,⍨{(+/∨\' '≠⌽⍵)↑¨↓⍵}0 1↓⊃,/' ',¨↑¨↓⍉(∨/'⎕UCS'⍷##.string ⎕R'')_Paren_(⍺∘∇)¨⍵
               HiRank ⍵:Self⍤¯1 _Sub_ os cs⊢⍵
               Nested ⍵:Self¨_Sub_ or cr⊢⍵
          
@@ -163,30 +163,50 @@
 
       Format←{
           Split←{(+/∨\' '≠⌽⍵)↑¨↓⍵}⎕FMT
-     
-          'AIX'≢3↑⊃# ⎕WG'APLVersion':Split ⍺ ∆FMTAPLAN Split ⍵  ⍝ Experimental I-beam - do not use!
+                                        ⍝ change "(⋄" to just "("
+          'AIX'≢3↑⊃# ⎕WG'APLVersion':¯1↓'''[^'']*''' '\(⋄'⎕R'\0' '('Split ⍺ ∆FMTAPLAN Split ⍵
      
           split←Split ⍵
-          ⍺:'''[^'']*''' '([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
+          ⍺:string'([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
      
           spaces←⌊|num+2×0=num
-          code←'''[^'']*'''⎕R'⋄'⊢⍵                     ⍝ remove quoted text first
+          code←string ⎕R'⋄'⊢⍵                     ⍝ remove quoted text first
           fmt←⎕FMT'\[[^][]+\]' '\([^)(]+\)'⎕R''⍣≡code  ⍝ remove bracket contents
           delta←(+/'(['∊⍨fmt)-(+/fmt∊')]')
           ind←+\0(⌊+0,¯1↓⌈)delta
           ind{⍵,⍨⍺⍴''}¨split
       }
 
+      Safe←{ ⍝ Is ⍵ APLAN safe?
+          comment←'\h*⍝.*'
+          exp←'(?<=\d)\.?e¯?(?=\d)'
+          complex←'(?<=\d)\.?j¯?\.?(?=\d)'
+          ucs←'⎕ucs'
+          null←'⎕null'
+          empty←'0\h*⌿'
+          member←'([\w∆⍙]|⎕(avu|ct|dct|div|fr|io|ml|pp|rl|rtl|using|wx))+\h*:'
+          other←'[][)(⋄¯.⊂⍬,\s]+'
+          remain←string comment exp complex ucs null empty member other ⎕R''⍠1⍠'Mode' 'D'⊢⍵
+          remain~←⎕D ⍝ separate step because j/e
+          remain←'\{[^{}]*\}'⎕R''⍠'Mode' 'D'⍠'DotAll' 1⍣≡remain ⍝ dfns
+          ''≡remain
+      }
+
       Deserialise←{ ⍝ Convert text to array
-          ⍺←⍬ ⍝ 1=execute expression; 0=return expression
-          execute←serialise.FirstNum ⍺,1
+          ⍺←⍬ ⍝ 1=safe exec expr; 0=return expr; ¯1=unsafe exec expr; ¯2=force APL model
+          num1←serialise.FirstNum ⍺,1
+          model←¯2=num1
+          execute←1⌊|num1
+          beSafe←0⌈execute
           caller←serialise.FirstNs ⍺,⊃⎕RSI
      
           ⍝ Make normalised simple vector:
           w←↓⍣(2=≢⍴⍵)⊢⍵                  ⍝ if mat, make nested
           w←{¯1↓∊⍵,¨⎕UCS 13}⍣(2=|≡w)⊢w   ⍝ if nested, make simple
      
-          'AIX'≢3↑⊃# ⎕WG'APLVersion':caller ∆APLAN,w
+          beSafe>Safe w:⎕SIGNAL⊂('EN' 11)('Message' 'Unsafe array notation')
+                                                          ⍝ fall back to APL model on error
+          model<execute∧'AIX'≢3↑⊃# ⎕WG'APLVersion':caller ∇{2::⍵ ⍺⍺⍨¯2,⍺ ⋄ ⍺ ∆APLAN,⍵}w
      
           q←''''
           ⎕IO←0
@@ -295,11 +315,12 @@
 
 
     :Section Sys
-    ∆XR      ←    {⍺.(183⌶)⍵}
     ∆Monadic ←       {900⌶⍵}
+    :Section Experimental I-beams - do not use!
+    ∆XR      ←    {⍺.(183⌶)⍵}
     ∆APLAN   ←{1 ⍺.(62582⌶)⍵}
     ∆FMTAPLAN←   {⍺(62583⌶)⍵}
-
+    :EndSection
       ∆NS←{ ⍝ allows ⎕NS names values
           ⍺←⊢ ⍝ default to unnamed namespace
           11::⎕SIGNAL 11
