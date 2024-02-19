@@ -45,7 +45,7 @@
         :Section REPR
           Repr←{
               ⍵≡⍬:'⍬'
-              ⍵≡0⍴⎕NULL:'0⌿⎕NULL'
+              ⍵≡0⌿⎕NULL:'0⌿⎕NULL'
               Char ⍵:Clean Esc qu,(qu ⎕R qu qu⊢⍵),qu
               Num ⍵:⍕⍵
               Null ⍵:'⎕NULL'⍴⍨5×≢⍵
@@ -75,7 +75,11 @@
                       :CaseList 3.1 4.1
                           repr,←name,':(∇',code,nl,'∇)'
                       :CaseList 3.2 4.2
-                          repr,←1↓':'@(<\'←'=⊢)code
+                          :If '{'=⊃' '~⍨∊code ⍝ anon
+                              repr,←name,':',code
+                          :Else
+                              repr,←1↓':'@(<\'←'=⊢)code
+                          :EndIf
                       :CaseList 3.3 4.3
                           xr←ref ∆XR name
                           nr←ref.⎕NR name
@@ -152,7 +156,7 @@
      
           Bad←{(caller code)←⍵
               '+'∊⍺:0
-              value←Deserialise caller.{⍺⍺ ⍵}code ⍝ deserialise in caller namespace to have proper ⎕FR
+              value←¯1 Deserialise caller.{⍺ ⍺⍺ ⍵}code ⍝ deserialise in caller namespace to have proper ⎕FR
               code≢caller serialise.Ser value  ⍝ serialisation must round-trip
           }
           code←caller serialise.Ser ⍵
@@ -194,10 +198,7 @@
 
       Deserialise←{ ⍝ Convert text to array
           ⍺←⍬ ⍝ 1=safe exec expr; 0=return expr; ¯1=unsafe exec expr; ¯2=force APL model
-          num1←serialise.FirstNum ⍺,1
-          model←¯2=num1
-          execute←1⌊|num1
-          beSafe←0⌈execute
+          (model beSafe execute)←(¯2∘=,0∘⌈,1⌊|)serialise.FirstNum ⍺,1
           caller←serialise.FirstNs ⍺,⊃⎕RSI
      
           ⍝ Make normalised simple vector:
@@ -572,25 +573,25 @@
               (⍬ ⋄ )
           }Is,⊂⍬
           {
-              0⍴⊂⍬
-          }Is 0⍴⊂⍬
+              0⌿⊂⍬
+          }Is 0⌿⊂⍬
           {
-              0⍴⊂⊂⍬
-          }Is 0⍴⊂⊂⍬
+              0⌿⊂⊂⍬
+          }Is 0⌿⊂⊂⍬
           {
-              0⍴⊂0⍴⊂⍬
-          }Is 0⍴⊂0⍴⊂⍬
+              0⌿⊂0⌿⊂⍬
+          }Is 0⌿⊂0⌿⊂⍬
           {[⍬ ⋄ ]
           }Is⍉⍪⍬
           {
-              ⍉[⍬ ⋄ ]
+              0⌿[0 ⋄ ]
           }Is⍪⍬
           {
-              0⍴⊂[⍬ ⋄ ]
-          }Is 0⍴⊂⍉⍪⍬
+              0⌿⊂[⍬ ⋄ ]
+          }Is 0⌿⊂⍉⍪⍬
           {
-              0⍴⊂⍉[⍬ ⋄ ]
-          }Is 0⍴⊂⍪⍬
+              0⌿⊂0⌿[0 ⋄ ]
+          }Is 0⌿⊂⍪⍬
       :EndSection
      
       :Section Namespace
@@ -607,16 +608,16 @@
               ()()
           }Is'[{},{}]'
      
-          {
-              (a:⍳n←3 ⋄ b:n*2)
-          }Is'{"a":[0,1,2],"b":9}'
+⍝          {
+⍝              (a:⍳n←3 ⋄ b:n*2)
+⍝          }Is'{"a":[0,1,2],"b":9}'
      
-          {
-              (p:{⍺+⍵}
-              m:{⍺-⍵}
-              s:,∘(,',')((,',')∘,)
-              o:⍣2)
-          }Is'p:{⍺+⍵}' 'm:{⍺-⍵}' 's:(,∘(' '))((' ')∘,)' 'o:⍣2'
+⍝          {
+⍝              (p:{⍺+⍵}
+⍝              m:{⍺-⍵}
+⍝              s:,∘(,',')((,',')∘,)
+⍝              o:⍣2)
+⍝          }Is'p:{⍺+⍵}' 'm:{⍺-⍵}' 's:(,∘(' '))((' ')∘,)' 'o:⍣2'
      
           {
               (v:(1 2 ⋄ 3))
@@ -649,7 +650,7 @@
       ⎕IO←0
       ⎕TRAP←(~stop_on_error)/⊂999 'C' '→r←0'
       Is←{
-          Check←'MISMATCH'⎕SIGNAL 999/⍨⍵∘≢
+          Check←'MISMATCH'⎕SIGNAL 999↓⍨⍵∘≡∨1∊⍵⍷↑
           a←⍺⍺ Inline 1
           ×⎕NC'⍺':Check a.⎕NR ⍺
           Check{⎕JSON⍣(326∊⎕DR¨∊⍵)⊢⍵}⍣(⍵≢⎕NULL)⊢a
@@ -675,7 +676,9 @@
           {(42
               )}Is,42
      
-          {'Hello',⎕AV}Is'Hello',⎕AV
+          {           ⍝ ⎕AV
+              'Hello',(⎕UCS 0 8 10 13 32 12 6 7 27 9 9014 619),'%''⍺⍵_abcdefghijklmnopqrstuvwxyz',(⎕UCS 1 2),'¯.⍬0123456789',(⎕UCS 3 8866 165),'$£¢∆ABCDEFGHIJKLMNOPQRSTUVWXYZ',(⎕UCS 4 5 253 183 127),'⍙ÁÂÃÇÈÊËÌÍÎÏÐÒÓÔÕÙÚÛÝþãìðòõ{',(⎕UCS 8364),'}⊣⌷¨ÀÄÅÆ⍨ÉÑÖØÜßàáâäåæçèéêëíîïñ[/⌿\⍀<≤=≥>≠∨∧-+÷×?∊⍴~↑↓⍳○*⌈⌊∇∘(⊂⊃∩∪⊥⊤|;,⍱⍲⍒⍋⍉⌽⊖⍟⌹!⍕⍎⍫⍪≡≢óôöø"#',(⎕UCS 30 38 180 9496 9488 9484 9492 9532 9472 9500 9508 9524 9516 9474),'@ùúû^ü`∣¶:⍷¿¡⋄←→⍝)]',(⎕UCS 31 160),'§⎕⍞⍣'
+          }Is'Hello',⎕AV
      
           {
               (1 2 3 'Hello' ⋄ 4 5 6 'World')
@@ -797,25 +800,25 @@
               (⍬ ⋄ )
           }Is,⊂⍬
           {
-              0⍴⊂⍬
-          }Is 0⍴⊂⍬
+              0⌿⊂⍬
+          }Is 0⌿⊂⍬
           {
-              0⍴⊂⊂⍬
-          }Is 0⍴⊂⊂⍬
+              0⌿⊂⊂⍬
+          }Is 0⌿⊂⊂⍬
           {
-              0⍴⊂0⍴⊂⍬
-          }Is 0⍴⊂0⍴⊂⍬
+              0⌿⊂0⌿⊂⍬
+          }Is 0⌿⊂0⌿⊂⍬
           {[⍬ ⋄ ]
           }Is⍉⍪⍬
           {
-              ⍉[⍬ ⋄ ]
+              0⌿[0 ⋄ ]
           }Is⍪⍬
           {
-              0⍴⊂[⍬ ⋄ ]
-          }Is 0⍴⊂⍉⍪⍬
+              0⌿⊂[⍬ ⋄ ]
+          }Is 0⌿⊂⍉⍪⍬
           {
-              0⍴⊂⍉[⍬ ⋄ ]
-          }Is 0⍴⊂⍪⍬
+              0⌿⊂0⌿[0 ⋄ ]
+          }Is 0⌿⊂⍪⍬
       :EndSection
      
       :Section Namespace
@@ -832,14 +835,14 @@
               ()()
           }Is'[{},{}]'
      
-          {
-              (a:⍳n←3 ⋄ b:n*2)
-          }Is'{"a":[0,1,2],"b":9}'
+⍝          {
+⍝              (a:⍳n←3 ⋄ b:n*2)
+⍝          }Is'{"a":[0,1,2],"b":9}'
      
           'p' 'm'{
-              (p:+
+              (p:{⍺+⍵}
               m:{⍺-⍵})
-          }Is¨(,'+')(,⊂' m←{⍺-⍵}')
+          }Is¨'{⍺+⍵}' '{⍺-⍵}'
      
           {
               (v:(1 2 ⋄ 3))
@@ -972,13 +975,13 @@
       :Section Empty
           Is ⍬
           Is,⊂⍬
-          Is 0⍴⊂⍬
-          Is 0⍴⊂⊂⍬
-          Is 0⍴⊂0⍴⊂⍬
+          Is 0⌿⊂⍬
+          Is 0⌿⊂⊂⍬
+          Is 0⌿⊂0⌿⊂⍬
           Is⍉⍪⍬
           Is⍪⍬
-          Is 0⍴⊂⍉⍪⍬
-          Is 0⍴⊂⍪⍬
+          Is 0⌿⊂⍉⍪⍬
+          Is 0⌿⊂⍪⍬
       :EndSection
      
       :Section Namespace
