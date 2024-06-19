@@ -289,6 +289,8 @@
               1≡⍵:GetJSON5 verSpec
               2≡⍵:GetJSON5 verAgno
               (vs va)←∇¨1 2
+              ⎕NULL≡vs:va
+              ⎕NULL≡va:vs
               merge←9∧.=40 ⎕ATX'vs' 'va'
               va ⎕NS⍣merge⊢vs
           }
