@@ -283,7 +283,7 @@
      
           GetVal←{
               GetJSON5←{
-                  ⎕NEXISTS ⍵:⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
+                  ⎕NEXISTS ⍵:0 ⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
                   ⎕NULL
               }
               1≡⍵:GetJSON5 verSpec
@@ -292,18 +292,18 @@
               merge←9∧.=40 ⎕ATX'vs' 'va'
               va ⎕NS⍣merge⊢vs
           }
-          
-          val←GetVal|act
+     
+          val←GetVal act
      
           PutJSON←{
+              ⎕NULL≡⍺:1 ⎕NDELETE ⍵
               _←3 ⎕MKDIR⊃⎕NPARTS ⍵
-              ⍵ 1 ⎕NPUT⍨⎕JSON⍠'Compact' 0⊢⍺
+              ⍵ 1 ⎕NPUT⍨1 ⎕JSON⍠'Compact' 0⊢⍺
           }
      
-          set<0 1 2∊⍨⊂act:val                                     ⍝          0  1  2
-          set<¯2 ¯1∊⍨⊂act:_←val⊣1 ⎕NDELETE(|act)⊃verSpec verAgno  ⍝  ¯2  ¯1
-          set∧1 2∊⍨⊂act:_←val⊣⍺ PutJSON act⊃verSpec verAgno       ⍝            ⍺1 ⍺2
-          ⎕SIGNAL 11                                              ⍝ ⍺¯2 ⍺¯1 ⍺0
+          set<0 1 2∊⍨⊂act:val
+          set∧1 2∊⍨⊂act:_←val⊣⍺ PutJSON act⊃verSpec verAgno
+          ⎕SIGNAL 11
       }
 
     :EndSection
@@ -888,6 +888,11 @@
               obj←mod{16::⊂'[ref]' ⋄ 1(↑⍣⍺)⍵}obj  ⍝ take only 1st? (grab prototype if empty)
               shape←mod{⍵≡,1:',' ⋄ (⍺∨1<⍴⍵)/'⍴',⍨⍕⍵}s
               shape←shape,(encl←simple<as)⍴'⊂'
+     
+     
+⍝ Reduce object to shortest viable prefix
+              len←1⍳⍨(obj≡s⍴↑∘obj)¨⍳n
+              len<≢obj:P⍣rc⊢(⍕s),'⍴',0 ref ∇ obj⍴⍨len~1
      
 ⍝ Simple scalars and char vector≠⍴1 do not need parens
               parens←rc∧simple≤(0<⍴shape)∨(rank=1)∧num∨{80 82 160 320∊⍨⎕DR ⍵:∨/0 8 10 13 133∊⎕UCS ⍵ ⋄ 0}⍵
