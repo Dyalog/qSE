@@ -1,4 +1,4 @@
-:NameSpace Utils ⍝ V1.55
+:NameSpace Utils ⍝ V1.56
 ⍝ Namespace containing :Includable utility functions
 ⍝ 2015 11 12 Adam: Auto version + format & layout now handle matrices
 ⍝ 2016 05 29 DanB: added setupKeys and double quotes for JS
@@ -38,6 +38,8 @@
 ⍝ 2023 05 30 Adam: Staticise ⎕USING as the Core value works in Framework
 ⍝ 2023 06 30 Adam: Dynamicise ⎕USING again as the Core value generates error messages in Framework
 ⍝ 2024 01 04 Adam: Make CD be non-shy as promised
+⍝ 2024 06 18 Adam: repObj reshape shortest prefix
+⍝ 2024 06 19 Adam: 00375 Ability for APL code to permanently store values - Remember
 
     :Section General
     ⎕IO←⎕ML←1
@@ -254,6 +256,54 @@
           i←noUrls⍳⊃Filter/terms,⊂noUrls
           r←i⊃¨⊂APLcartTable 0
           2↑⍤1⍣(~⍺)⎕CSV⍠'Separator'(⎕UCS 9)⍠'QuoteChar' ''⍠'DoubleQuote' 0⊂r
+      }
+
+      Remember←{
+          set←0≠40 ⎕ATX'⍺'
+          (id act)←2↑set,⍨⊆⍵
+     
+          win←'Windows'≡7↑⊃(os ver)←2↑# ⎕WG'APLVersion'
+     
+          verSpec←{
+              NoSlash←{⍵↓⍨-'/\'∊⍨⊃⌽⍵}
+              home←NoSlash Config'HOME'
+              win:NoSlash 2⊃4070⌶⍬ ⍝ win only: version specific folder in user docs folder
+              num←∊2↑'.'(≠⊆⊢)ver
+              uc←'UC'/⍨80 82=⎕DR'' ⍝ unicode/classic
+              bits←¯2↑'32',{⍵↓⍨⍵⍳'-'}os
+              home,'/dyalog.',num,uc,bits,'.files'
+          }⍬
+     
+          verAgno←{
+              user←⊃⎕NPARTS verSpec ⍝ /../
+              user,'dyalog.files' 'Dyalog APL Files'⊃⍨1+win
+          }⍬
+     
+          (verSpec verAgno),←⊂'/Remembered/',id,'.json'
+     
+          GetVal←{
+              GetJSON5←{
+                  ⎕NEXISTS ⍵:⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
+                  ⎕NULL
+              }
+              1≡⍵:GetJSON5 verSpec
+              2≡⍵:GetJSON5 verAgno
+              (vs va)←∇¨1 2
+              merge←9∧.=40 ⎕ATX'vs' 'va'
+              va ⎕NS⍣merge⊢vs
+          }
+          
+          val←GetVal|act
+     
+          PutJSON←{
+              _←3 ⎕MKDIR⊃⎕NPARTS ⍵
+              ⍵ 1 ⎕NPUT⍨⎕JSON⍠'Compact' 0⊢⍺
+          }
+     
+          set<0 1 2∊⍨⊂act:val                                     ⍝          0  1  2
+          set<¯2 ¯1∊⍨⊂act:_←val⊣1 ⎕NDELETE(|act)⊃verSpec verAgno  ⍝  ¯2  ¯1
+          set∧1 2∊⍨⊂act:_←val⊣⍺ PutJSON act⊃verSpec verAgno       ⍝            ⍺1 ⍺2
+          ⎕SIGNAL 11                                              ⍝ ⍺¯2 ⍺¯1 ⍺0
       }
 
     :EndSection
