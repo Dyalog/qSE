@@ -261,7 +261,8 @@
       Remember←{
           set←0≠40 ⎕ATX'⍺'
           (id act)←2↑set,⍨⊆⍵
-     
+          caller←⊃⎕RSI
+
           win←'Windows'≡7↑⊃(os ver)←2↑# ⎕WG'APLVersion'
      
           verSpec←{
@@ -283,7 +284,7 @@
      
           GetVal←{
               GetJSON5←{
-                  ⎕NEXISTS ⍵:0 ⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
+                  ⎕NEXISTS ⍵:0 caller.⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
                   ⎕NULL
               }
               1≡⍵:GetJSON5 verSpec
