@@ -258,57 +258,6 @@
           2↑⍤1⍣(~⍺)⎕CSV⍠'Separator'(⎕UCS 9)⍠'QuoteChar' ''⍠'DoubleQuote' 0⊂r
       }
 
-      Remember←{
-          set←0≠40 ⎕ATX'⍺'
-          (id act)←2↑set,⍨⊆⍵
-          caller←⊃⎕RSI
-
-          win←'Windows'≡7↑⊃(os ver)←2↑# ⎕WG'APLVersion'
-     
-          verSpec←{
-              NoSlash←{⍵↓⍨-'/\'∊⍨⊃⌽⍵}
-              home←NoSlash Config'HOME'
-              win:NoSlash 2⊃4070⌶⍬ ⍝ win only: version specific folder in user docs folder
-              num←∊2↑'.'(≠⊆⊢)ver
-              uc←'UC'/⍨80 82=⎕DR'' ⍝ unicode/classic
-              bits←¯2↑'32',{⍵↓⍨⍵⍳'-'}os
-              home,'/dyalog.',num,uc,bits,'.files'
-          }⍬
-     
-          verAgno←{
-              user←⊃⎕NPARTS verSpec ⍝ /../
-              user,'dyalog.files' 'Dyalog APL Files'⊃⍨1+win
-          }⍬
-     
-          (verSpec verAgno),←⊂'/Remembered/',id,'.json'
-     
-          GetVal←{
-              GetJSON5←{
-                  ⎕NEXISTS ⍵:0 caller.⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
-                  ⎕NULL
-              }
-              1≡⍵:GetJSON5 verSpec
-              2≡⍵:GetJSON5 verAgno
-              (vs va)←∇¨1 2
-              ⎕NULL≡vs:va
-              ⎕NULL≡va:vs
-              merge←9∧.=40 ⎕ATX'vs' 'va'
-              va ⎕NS⍣merge⊢vs
-          }
-     
-          val←GetVal act
-     
-          PutJSON←{
-              ⎕NULL≡⍺:1 ⎕NDELETE ⍵
-              _←3 ⎕MKDIR⊃⎕NPARTS ⍵
-              ⍵ 1 ⎕NPUT⍨1 ⎕JSON⍠'Compact' 0⊢⍺
-          }
-     
-          set<0 1 2∊⍨⊂act:val
-          set∧1 2∊⍨⊂act:_←val⊣⍺ PutJSON act⊃verSpec verAgno
-          ⎕SIGNAL 11
-      }
-
     :EndSection
     :Section Strings
 
