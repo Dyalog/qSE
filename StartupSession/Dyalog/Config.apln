@@ -81,7 +81,7 @@
           Merge←{(va vs)←⍺ ⍵  ⍝ merge namespace values or return version ⍵ if not both ⍺ and ⍵ are namespaces
               vars←2=40 ⎕ATX'vs' 'va'
               ∨/vars,vs va∊non:⊃vs va ⍺/⍨vars,1  ⍝ return first good
-              va⊣'va'⎕NS vs                      ⍝ two namespaces: merge
+              ⊃(⎕NS⍬)⎕NS¨va vs  ⍝ two namespaces: merge
           }
           vm←va Merge vs
      
