@@ -64,7 +64,7 @@
           types←0⌿¨rarg
      
           ids←rarg/⍨types∊⊂''
-          1≠≢ids:⎕SIGNAL⊂('EN' 11)('Message' 'Only one ID allowed')
+          1≠≢ids:⎕SIGNAL⊂('EN' 11)('Message' 'Exactly one ID required')
           id←⊃ids
      
           scopes←∊⍬,rarg/⍨types∊⊂⍬
@@ -85,7 +85,7 @@
           }
           vm←va Merge vs
      
-          msg←'No ','version specific ' 'version agnostic ' ''⊃⍨+/scopes
+          msg←'No ','version specific ' 'version agnostic ' ''⊃⍨3⌊+/scopes
           msg,←'data available for "',id,'"'
           16::⎕SIGNAL⊂('EN' 6)('Message'msg)
      
