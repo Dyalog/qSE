@@ -1,4 +1,4 @@
-:NameSpace Utils ⍝ V1.55
+:NameSpace Utils ⍝ V1.551
 ⍝ Namespace containing :Includable utility functions
 ⍝ 2015 11 12 Adam: Auto version + format & layout now handle matrices
 ⍝ 2016 05 29 DanB: added setupKeys and double quotes for JS
@@ -38,6 +38,7 @@
 ⍝ 2023 05 30 Adam: Staticise ⎕USING as the Core value works in Framework
 ⍝ 2023 06 30 Adam: Dynamicise ⎕USING again as the Core value generates error messages in Framework
 ⍝ 2024 01 04 Adam: Make CD be non-shy as promised
+⍝ 2024 07 29 Adam: [20129] Respect ⎕PP
 
     :Section General
     ⎕IO←⎕ML←1
@@ -385,6 +386,8 @@
       }
 
       ∆FMT1←{
+          ⍺←(⍬⍴⎕RSI).⎕PP
+          ⎕PP←⍺
           ⎕FMT(⎕UCS 13)@{⍵=⎕UCS 10}⍵/⍤1⍨~⍵⍷⍨⎕UCS 13 10
       }
 
@@ -400,7 +403,7 @@
      
           box←{                                   ⍝ Recursive boxing of nested array.
               isor ⍵:⎕FMT⊂⍵                       ⍝ ⎕or: '∇name'.
-              1=≡,⍵:dec open ∆FMT1 dec open ⍵     ⍝ simple array: format.
+              1=≡,⍵:dec open ⎕PP ∆FMT1 dec open ⍵     ⍝ simple array: format.
               mat←matr 1/dec open ⍵               ⍝ matrix of opened subarrays.
               r c←×⍴mat                           ⍝ non-null rows/cols.
               dec<0∊r c:c/r⌿∇ 1 open mat          ⍝ undecorated null: empty result.
@@ -495,7 +498,7 @@
           glue←{0=⍴⍵:⍵ ⋄ ↑⍺{⍺,⍺⍺,⍵}/⍵}            ⍝ ⍵ interspersed with ⍺s.
      
           isor ⍵:⎕FMT⊂⍵                           ⍝ simple ⎕OR: done.
-          1=≡,⍵:∆FMT1 ⍵                           ⍝ simple array: done.
+          1=≡,⍵:⎕PP ∆FMT1 ⍵                           ⍝ simple array: done.
           box ⍵                                   ⍝ recursive boxing of array.
       }
 
@@ -526,7 +529,7 @@
           {                                           ⍝ Recursively box arrays:
               0=≡⍵:' '⍪(open ⎕FMT ⍵)⍪line ⍵           ⍝ Simple scalar.
               1 ⍬≡(≡⍵)(⍴⍵):'∇' 0 0 box ⎕FMT ⍵         ⍝ Object rep: ⎕OR.
-              1=≡⍵:(deco ⍵)box open ∆FMT1 open ⍵      ⍝ Simple array.
+              1=≡⍵:(deco ⍵)box open ⎕PP ∆FMT1 open ⍵      ⍝ Simple array.
               ('∊'deco ⍵)box trim ⎕FMT ∇¨open ⍵       ⍝ Nested array.
           }⍵
       }
