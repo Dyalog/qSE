@@ -1,42 +1,38 @@
 :Namespace Config
 
-    ∇ dir←VerAgno;base;w;x;pat ⍝ report current effective path to version agnostic user settings dir
+    ∇ dir←AllVersions;base;w;x;pat ⍝ report current effective path to version agnostic user settings dir
       x←~w←⊃'Windows'⍷⊃# ⎕WG'APLVersion'
      
-      pat←'[DYALOG_CONFIG_VERAGNO]' '$XDG_CONFIG_HOME/dyalog/apl' '$HOME/.config/dyalog/apl' '%APPDATA%\dyalog\apl'
+      pat←'[DYALOG_CONFIG_ALLVERSIONS]' '$XDG_CONFIG_HOME/dyalog/apl' '$HOME/.config/dyalog/apl' '%APPDATA%\dyalog\apl'
       dir←⎕SE.Dyalog.Utils.ExpandConfig 1 x x w/pat
       dir⊃⍤~←⊂''
     ∇
 
-    ∇ dir←VerSpec;x;w;os;ver;pat ⍝ report current effective path to version specific user settings dir
+    ∇ dir←ThisVersion;x;w;os;ver;pat ⍝ report current effective path to version specific user settings dir
       x←~w←⊃'Windows'⍷⊃(os ver)←2↑# ⎕WG'APLVersion'
      
       ver(∊2↑≠⊆⊣)←'.'           ⍝ maj.min
       ver,←'UC'/⍨80 82=⎕DR''    ⍝ U[nicode]/C[lassic]
       ver,←¯2↑'32',(⍳∘'-'↓⊢)os  ⍝ -bits
      
-      pat←'[DYALOG_CONFIG_VERSPEC]',⍥⊆'$XDG_CONFIG_HOME/dyalog/apl/' '$HOME/.config/dyalog/apl/' '%APPDATA%\dyalog\apl\',¨⊂ver
+      pat←'[DYALOG_CONFIG_THISVERSION]',⍥⊆'$XDG_CONFIG_HOME/dyalog/apl/' '$HOME/.config/dyalog/apl/' '%APPDATA%\dyalog\apl\',¨⊂ver
       dir←⎕SE.Dyalog.Utils.ExpandConfig 1 x x w/pat
       dir⊃⍤~←⊂''
     ∇
 
       Set←{
           ⍝ [newVal] Set id [scope(s)]
-          ⍝ scope(s): 1=VerSpec, 2=VerAgno (default), 3=Both
+          ⍝ scope(s): 1=ThisVersion, 2=AllVersions (default), 3=Both
           ⍝ omit left argument (or use ⎕NULL) to delete configuration
           ⍝ ⎕A Set 'user-alphabet'
      
           0::⎕SIGNAL⊂⎕DMX.(('EN'EN)('EM'EM)('Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message)))  ⍝ bubble errors
      
-          r←⎕NULL Get ⍵
-     
           rarg←⊂⍣(''≡0⌿⍵)⊢⍵  ⍝ enclose if simple string
-          types←0⌿¨⍵
+          2<≢rarg:⎕SIGNAL⊂('EN' 11)('Message' 'Argument must be ID optionally followed by scope')
+          (id scopes)←rarg,2⍴⍨1=≢rarg  ⍝ default is 2
      
-          id←⊃rarg/⍨types∊⊂''
-     
-          scopes←⍬,rarg/⍨types∊⊂⍬
-          scopes,←2/⍨⍬≡scopes  ⍝ default
+          r←⎕NULL Get id scopes
      
           PutJSON←{  ⍝ Write verbose JSON of value ⍺ to file ⍵ making any dirs needed
               ⎕NULL≡⍺:1 ⎕NDELETE ⍵
@@ -45,14 +41,14 @@
           }
      
           ⍺←⎕NULL
-          paths←VerAgno VerSpec/⍨2 2⊤+/scopes
+          paths←AllVersions ThisVersion/⍨2 2⊤+/∪scopes
           paths,¨←⊂'/',id,'.json'
           1:r←r⊣⍺∘PutJSON¨paths
       }
 
       Get←{
           ⍝ [defaultVal] Get id [scope(s)]
-          ⍝ scope(s): 1=VerSpec, 2=VerAgno, 3=Merge (default)
+          ⍝ scope(s): 1=ThisVersion, 2=AllVersions, 3=Merge (default)
           ⍝ multiple scopes indicates priority
      
           0::⎕SIGNAL⊂⎕DMX.(('EN'EN)('EM'EM)('Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message)))  ⍝ bubble errors
@@ -61,32 +57,29 @@
           ⍺←non
      
           rarg←⊂⍣(''≡0⌿⍵)⊢⍵  ⍝ enclose if simple string
-          types←0⌿¨rarg
+          2<≢rarg:⎕SIGNAL⊂('EN' 11)('Message' 'Argument must be ID optionally followed by scope')
+          (id scopes)←rarg,3⍴⍨1=≢rarg  ⍝ default is 3
      
-          ids←rarg/⍨types∊⊂''
-          1≠≢ids:⎕SIGNAL⊂('EN' 11)('Message' 'Exactly one ID required')
-          id←⊃ids
+          ⍬≡'^[0-9_a-z]+-[0-9_a-z]+$'⎕S 3⊢id:⎕SIGNAL⊂('EN' 11)('Message' 'ID must be {vendor}-{subject} of digits/lowercase/underscore')
      
-          scopes←∊⍬,rarg/⍨types∊⊂⍬
-          scopes,←3/⍨⍬≡scopes  ⍝ default
           0∊scopes∊1 2 3:⎕SIGNAL⊂('EN' 11)('Message' 'Scope must be zero or more of 1 2 3')
      
           GetJSON5←{  ⍝ Read JSON5 from file ⍵ establishing namespace values in ⍺
+              11::⎕SIGNAL⊂('EN' 11)('Message'(⍵,⎕DMX.Message(⊣↓⍨¯1+⍳)':'))  ⍝ bad JSON
               ⎕NEXISTS ⍵:0 ⍺.⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
               non
           }
-          paths←VerAgno VerSpec,¨⊂'/',id,'.json'
+          paths←AllVersions ThisVersion,¨⊂'/',id,'.json'
           (va vs)←(⊃⎕RSI)GetJSON5¨paths
      
           Merge←{(va vs)←⍺ ⍵  ⍝ merge namespace values or return version ⍵ if not both ⍺ and ⍵ are namespaces
               vars←2=40 ⎕ATX'vs' 'va'
               ∨/vars,vs va∊non:⊃vs va ⍺/⍨vars,1  ⍝ return first good
-              ⊃(⎕NS⍬)⎕NS¨va vs  ⍝ two namespaces: merge
+              ⊃(⎕NS ⍬)⎕NS¨va vs  ⍝ two namespaces: merge
           }
           vm←va Merge vs
      
-          msg←'No ','version specific ' 'version agnostic ' ''⊃⍨3⌊+/scopes
-          msg,←'data available for "',id,'"'
+          msg←'No "',id,'" data available',' for this version' ' for all versions' ''⊃⍨3⌊3@(~×)+/∪scopes
           16::⎕SIGNAL⊂('EN' 6)('Message'msg)
      
           ⊃non~⍨vs va vm[scopes],⊂⍺
