@@ -815,6 +815,8 @@
       repObj←{ ⍝ String representation of object V0.35
       ⍝ Optional left arg: parenthesise if needed to isolate expression in context
      
+          ⎕IO←1
+
           ⍺←0 ⍝ parenthesise if expression
           P←'(',')',⍨⍕
           10::P⍣⍺⊢'0(220⌶)0(219⌶)',∊P¨2 9(219⌶)1(220⌶)⍵
