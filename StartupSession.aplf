@@ -9,7 +9,7 @@
 ⍝ ∘ Link: https://dyalog.github.io/link/latest
 
  ;⎕IO;⎕ML ⍝ sysvars
- ;Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin ⍝ fns
+ ;Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox ⍝ fns
  ;win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep ⍝ vars
  ;exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds
 
@@ -22,6 +22,7 @@
 
  :Trap '1'∊Env'DYALOGSTARTUPDEBUG' ⍝ If DYALOGSTARTUPDEBUG, only trap WS FULL
      AutoStatus←2036⌶
+     MsgBox←3503⌶
      NoSlash←{⍵↓⍨-'/\'∊⍨⊃⌽⍵} ⍝ remove trailing (back)slash
      Cut←≠⊆⊢
      FullMsg←{⍵.(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⊆⍺}Message{⍵,⍺,⍨': '/⍨×≢⍺}⊃⍬⍴DM,⊂'')}
@@ -43,6 +44,17 @@
          tail←⍺↑⍨-1⌊≢⍺
          ⍵,⍨⍺,'/'↓⍨∧/tail∊'/',win/'\:'
      }
+     Critical←→{
+         ('CLEAR WS'≢⎕WSID)∨''≢Env'LOAD':{→}⍞←⍵ ⍝ message + cut full stack
+         win≤'1'∊Env'DYALOG_NOPOPUPS':⎕OFF 1⊣⎕DL 5⊣⍞←⍵
+         lc←⊃1↓⎕LC
+         ⍺←lc-1
+         r←¯60+MsgBox('⎕SE.StartupSession[',⍺⍕⍛,']')(⍵'' 'Abort startup entirely, Retry to inspect code, or Ignore and cut stack?')'Error'('ABORT' 'RETRY' 'IGNORE')
+         1=r:⎕OFF 1
+        ⍝ Attempt to stop on the line where the config param was first checked
+         2=r:⍺⊣1 ⎕NQ(⎕NEW'Timer'(⊂'Event'('Select' '[interrupt]')))'Select'⊣2 ⎕NQ ⎕SE'KeyPress' 'EP'
+         3=r:→  ⍝ cut full stack
+     }
 
      :Section __Read_Environment
          (os ver type exe)←# ⎕WG'APLVersion'
@@ -59,18 +71,19 @@
          envVars←Env¨'DYALOGSTARTUPSE' 'DYALOGSTARTUPWS'
 
          ⍝ Exit code 1 means startup fail due to missing or invalid resource
-         :If 0=≢dl←Env'DYALOGLINK'
+         dl←Env'DYALOGLINK'
+retryDl: :If 0=≢dl
              dl←dyalog
          :ElseIf ~⎕NEXISTS dl
-             ⍞←'Cannot read DYALOGLINK ("',dl,'"). Press Enter.'
-             ⎕DL 5 ⋄ ⎕OFF 1
+         :OrIf 1≠1 ⎕NINFO dl
+             retryDl Critical'Configuration parameter DYALOGLINK is "',dl,'" which must be an existing directory.'
          :EndIf
          :If 0=≢ds←⊃⎕NPARTS Env'DYALOGSTARTUP'
              ds←dyalog
          :EndIf
-         :If ~(⊂dskl←Env'DYALOGSTARTUPKEEPLINK')∊,¨'' '0' '1'
-             ⍞←'Configuration parameter DYALOGSTARTUPKEEPLINK is "',dskl,'" but must be "0" or "1". Press Enter.'
-             ⎕DL 5 ⋄ ⎕OFF 1
+         dskl←Env'DYALOGSTARTUPKEEPLINK'
+         :If ~dskl⊂⍛∊,¨'' '0' '1'
+             Critical'Configuration parameter DYALOGSTARTUPKEEPLINK is "',dskl,'" but must be "0" or "1".'
          :Else
              dskl∊⍨←'1'
          :EndIf
@@ -179,8 +192,7 @@
 
      :Section c_Call_Run_From_Dirs
          :If ~(⊂dsx)∊,¨'' '0' '1'
-             ⍞←'Configuration parameter DYALOGSTARTUP_X is "',dskl,'" but must be "0" or "1". Press Enter.'
-             {}⍞ ⋄ ⎕OFF 1
+             Critical'Configuration parameter DYALOGSTARTUP_X is "',dskl,'" but must be "0" or "1".'
          :Else
              dsx∊⍨←'1'
          :EndIf
