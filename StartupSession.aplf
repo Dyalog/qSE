@@ -181,7 +181,7 @@ retryDl: :If 0=≢dl
                  su.BootSALT ⍝ finally, call the bootstrap fn
              :EndIf
          :Else
-             ⍞←'SALT initialization failed: ',(⎕DMX.DM[2 3],⍨⊂FullMsg ⎕DMX),¨⎕UCS 13
+             ⍞←'SALT initialization failed: ',(⎕UCS 13),(⎕DMX.DM[2 3],⍨⊂FullMsg ⎕DMX),¨⎕UCS 13
          :EndTrap
          :If 3=⎕NC'⎕SE.Link.SECreate'
              {}⎕SE.Link.SECreate
@@ -200,13 +200,18 @@ retryDl: :If 0=≢dl
              run/⍨←3=40 ⎕ATX(⊃,'.Run'⍨)¨run ⍝ which ns.Run functions exist?
              :For ns dir :In run
                  :Trap 0
-                     :If 0≠11 ⎕ATX fn←ns,'.Run'
-                         (⍎fn),⊂dir
-                     :Else
+                     :Select 11 40 ⎕ATX fn←ns,'.Run' ⍝ valence,type
+                     :Case 0 3 ⍝ niladic function
                          ⍎fn
-                     :EndIf
+                     :CaseList (1 3)(¯2 3) ⍝ monadic/ambivalent function
+                         (⍎fn),⊂dir
+                     :Case 2 3 ⍝ dyadic function
+                         ⍞←('Function ',fn,' must not be dyadic'),⎕UCS 13
+                     :Else
+                         ⍞←('Cannot find function ',fn),⎕UCS 13
+                     :EndSelect
                  :Else
-                     ⎕←'Calling ',fn,' caused a ',FullMsg ⎕DMX
+                     ⍞←('Calling ',fn,' caused a ',FullMsg ⎕DMX),⎕UCS 13
                  :EndTrap
              :EndFor
          :EndIf
