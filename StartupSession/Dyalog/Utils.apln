@@ -49,7 +49,7 @@
       r←⊢/∊'V'⎕VFI⊃⎕SRC ⎕THIS
     ∇
 
-    where←{⍵/⍳⍴⍵}        ⍝ Indices of 1's in ⎕IO 1
+    where←⍸
 
     ∇ r←{origin}Config param;os;ver;NamesValues;EnvVars;env;claValues;Names;cla;cfg;all;OnlySet;val;loc;Adjust;ErrIf;cmd;⎕USING;sk;hk;key;name
     ⍝ Values of configuration parameters (optionally with origin)
