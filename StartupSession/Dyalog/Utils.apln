@@ -66,15 +66,15 @@
     ⍝         origin>0 and params is nested:  matrix of   (name source value) rows
     ⍝         origin=0 and params is '' or ⍬: matrix of   (name        value) rows
     ⍝         origin>1 and params is '' or ⍬: matrix of   (name source value) rows
-     
+
       :If 900⌶⍬ ⋄ origin←0 ⋄ :EndIf ⍝ default left
       (os ver)←2↑# ⎕WG'APLVersion'
-     
+
       ErrIf←⎕SIGNAL{(⌈/⍵)⍴⊂('EN' 11)('Message'⍺)}
       'requires 18.0 or higher'ErrIf 18>2 1⊃'.'⎕VFI ver
       'right argument (parameters) must be ⍬ character vector(s) or ⍬ (all)'ErrIf(3∘≤∘|∘≡,''⍬∘∊)param
       'left argument (show origin) must be 0 (none), 1 (short), or 2 (long)'ErrIf~0 1 2∊⍨⊂origin
-     
+
       :If ⍬''∊⍨⊂param ⍝ all
           :Trap 0
               env←⎕SH cmd←'env' 'set'⊃⍨1+'Windows'≡7↑os
@@ -83,15 +83,15 @@
           :EndTrap
           cfg←⊣/161⌶0 ⍝ unofficial: config file contents
           cla←2 ⎕NQ'.' 'GetCommandLineArgs'
-     
+
           OnlySet←{⍵/⍨'='∊¨⍵↑¨⍨⌊/⍵∘.⍳'''"'} ⍝ only name=value args
           Names←{⍵↑⍨¯1+⍵⍳'='}¨              ⍝ names up until "="
           all←{⍵[⍋⍵]}∪1 ⎕C cfg,Names env,OnlySet cla
-     
+
           r←{⍵⌿⍨×≢¨⊢/⍵}origin Config all ⍝ filter out empty vars
       :ElseIf 1≥|≡param ⍝ one
           (val loc)←160⌶param ⍝ unofficial: value and origin of configuration parameter
-     
+
           Adjust←{ ⍝ Expand or abbreviate origin
               (short long)←⍺=⍳2
               short∧'Environment variable'≡⍵:'Env var'
@@ -126,10 +126,10 @@
           ⍝ Handles ~ and ~+ and ~- under UX only
           ⍝ Use \ or ^ or ` to escape patterns
           ⍝ optionally restrict pattern type and escape using left argument as per below
-     
+
           ⍝ For user's home dir, use ⎕SE.SALTUtils.USERDIR
           0::⎕SIGNAL⊂⎕DMX.(('EN'EN)('Message'Message))
-     
+
           ⍺←0
           type←⎕C⊂⍺
           ps←type∊'ps' 'powershell' 'psh'
@@ -137,7 +137,7 @@
           salt←type∊'salt' 'dyalog'
           posix←type∊'posix' 'linux' 'unix' 'ux' 'pi' 'aix' 'mac' 'macos' 'qshell' 'rc'
           posix∨←'sh'≡¯2↑⊃type
-     
+
           Esc←'[%\\&]'⎕R'\\&'
           Untilde←{
               ⎕SE.SALTUtils.WIN>posix:⍵
@@ -146,13 +146,13 @@
               '(\W|^)~\+()' '(\W|^)~-()' '(\W|^)~(\W|$)'⎕R subs⍠'UCP' 1⊢⍵
           }
           Sub←{⍵⍵ ⎕R(⍺⍺{⍵.PatternNum:⍺⍺(Config ¯1↓↓)⍵.Match ⋄ ⊢/⍵.Match})⊢⍵} ⍝ chop leading ⍺ chars
-     
+
           ps:6 Sub'`[$`]' '\$\{env:([^}]+)}'⊢'\$env:([\pL_]\w*)'⎕R'${env:\1}'⊢⍵
           cmd:1 Sub'\^[%^]' '%([^%]+)%'⊢⍵
           salt:1 Sub']' '\[([^]]+)]'⊢⍵
           posix:2 Sub'\\[$\\]' '\$\{([^}]+)}'⊢'\$([\pL_]\w*)'⎕R'${\1}'⍠'UCP' 1 Untilde ⍵
           0≢⍺:⎕SIGNAL⊂('EN' 11)('Message' 'Left argument must be environment type (ps/cmd/salt/ux/etc.)')
-     
+
           bracked←'\$env:([\pL_]\w*)' '\$\{env:([^}]+)}' '\$([\pL_]\w*)' '\$\{([^}]+)}' '\[([^]]+)]' '%([^%]+)%'⎕R'[\1]'⍠'UCP' 1 Untilde ⍵
           1 Sub'\\[$\\]|\^[%^]|`[$`]' '\[([^]]+)]'⊢bracked
       }
@@ -191,12 +191,12 @@
       :Else
           old←⊃⎕SH'pwd'
       :EndIf
-     
+
       :If ~0∊⍴new         ⍝ change directory
           :If ~force
               ⎕SIGNAL(×≢relativeTies)/⊂('EN' 24)('Message'('Some files (',('.relativeTies',⍨⍕⎕THIS),') ⎕NTIEd/⎕FTIEd with relative names (use left argument 1 to ignore)'))
           :EndIf
-     
+
           :If 'Win'≡OS
              ⍝ chdir returns a single int: 1=ok
               ('Unable to change directory: ',new,': Invalid directory')⎕SIGNAL(chdir⊂new)↓22
@@ -286,17 +286,17 @@
       }
 
       drvSrc←{⎕ML←1                              ⍝ Linear representation of fnop named ⍵.
-     
+
           src←⍺.⎕CR ⍵                             ⍝ source.
-     
+
           qt←''''                                 ⍝ single quote
           qtd←{qt,((1+⍵=qt)/⍵),qt}                ⍝ quoted.
-     
+
           sepr←{                                  ⍝ adjacent arrays.
               qt∨.≠(⊃⌽⍺),⊃⍵:⍺,⍵                   ⍝ adjacent quoted vectors
               ⍺,' ',⍵                             ⍝ blank-separated.
           }
-     
+
           array←{
               0=≡⍵:scalar ⍵                       ⍝ simple scalar
               1 1≡(≡⍵),⍴⍴⍵:vector ⍵               ⍝ simple vector.
@@ -305,12 +305,12 @@
               1=⍴⍴⍵:⊃sepr/⊃,/(~ischar¨⍵)p∘∇¨⍵     ⍝ nested vector
               1 repObj ⍵                          ⍝ FIXME
           }
-     
+
           scalar←{                                ⍝ scalar value
               ischar ⍵:qtd ⍵                      ⍝ char
               ⍕,⍵                                 ⍝ number or ref
           }
-     
+
           vector←{                                ⍝ simple vector.
               0=⍴⍵:⊃(ischar ⍵)⌽'⍬'(qtd'')         ⍝ null: '' or ⍬.
               1=⍴⍵:1 p scalar⊃⍵                   ⍝ single vector → (,0)
@@ -318,22 +318,22 @@
               ∧/ischar¨⍵:qtd ⍵                    ⍝ simple char char vec:
               1 repObj ⍵                          ⍝ FIXME
           }
-     
+
           uni←80=⎕DR''                            ⍝ unicode version
-     
+
           pf0←'+-×÷⌊⌈|*⍟<≤=≥>≠∨∧⍱⍲!?~○'           ⍝ scalar fns.
           pf1←'⌷/⌿\⍀∊⍴↑↓⍳⊂⊃∩∪⊣⊢⊥⊤,⍒⍋⍉⌽⊖⌹⍕⍎⍪≡≢⍷'   ⍝ other fns.
           pfu←⎕UCS uni/8838 9080                  ⍝ where, condencl
           pfns←pf0,pf1,pfu                        ⍝ primitive fns.
-     
+
           kvr←⎕UCS uni/9000+16 18 56 60           ⍝ key, stencil, variant, rank
           pops←'/\⌿⍀.¨∘⍨&⍣[@⌶',kvr                ⍝ primitive ops.
-     
+
           ispfn←{(⊂,⍵)∊,¨pfns}
           ispop←{(⊂,⍵)∊,¨pops}
           isnum←{0≡⊃0⍴⍵}
           ischar←{' '≡⊃0⍴⍵}
-     
+
           isdfn←{             ⍝ probably the ⎕cr of a dfn
               1≠≡⍵:0          ⍝ too deep
               ~(⍴⍴⍵)∊2 1:0    ⍝ not a matrix (or vector)
@@ -342,7 +342,7 @@
               '{'=⊃⍵:1        ⍝ starts with {...
               1∊'←{'⍷⍵        ⍝ starts with name←{
           }
-     
+
           isderv←{            ⍝ probably the ⎕cr of a derived fn.
               ~1=⍴⍴⍵:0        ⍝ not a vector.
               ~(⍴⍵)∊2,⍺+2:0   ⍝ not monadic or dyadic operator.
@@ -351,24 +351,24 @@
               dop←isdfn op    ⍝ D-operator.
               pop∨dop         ⍝ operator.
           }
-     
+
           istrain←{           ⍝ probably the ⎕cr of a fn train.
               ~1=⍴⍴⍵:0        ⍝ not a vector.
               ~(⍴⍵)∊2 3:0     ⍝ not 2- or 3-train
               ∧/isfn¨¯2↑⍵     ⍝ last two tines are fns
           }
-     
+
           issysfn←{           ⍝ is a ⎕fn?
               1≠≡⍵:0          ⍝ too deep
               1≠⍴⍴⍵:0         ⍝ not a vector
               '⎕'≠⊃⍵:0        ⍝ doesn't start '⎕...'
               1               ⍝ ok.
           }
-     
+
           isfn←{(isdfn ⍵)∨(ispfn ⍵)∨(istrain ⍵)∨(0∘isderv ⍵)∨(1∘isderv ⍵)∨issysfn ⍵}
-     
+
           p←{⍺=0:⍵ ⋄ '(',⍵,')'}   ⍝ ⍺-conditional parens.
-     
+
           def←{
               ispfn ⍵:⍵                                                ⍝ primitive fn.
               ispop ⍵:⍵                                                ⍝ primitive oper.
@@ -383,7 +383,7 @@
               issysfn ⍵:⍵                                              ⍝ system fn.
               array ⍵
           }
-     
+
           ,↑0 def src
       }
 
@@ -394,15 +394,15 @@
       }
 
       disp←{⎕IO ⎕ML←0 1                           ⍝ Boxed sketch of nested array.
-     
+
           ⍺←⍬ ⋄ opts←⍺,(⍴,⍺)↓1 1 1 0 ⎕PP          ⍝ option defaults:
           dec bch ctd sep ⎕PP←5↑opts              ⍝ decor, smooth, centred, separate pp.
-     
+
           ul uc ur←bch⊃⌽'┌┬┐' '.'                 ⍝ upper──┐ ┌───left
           ml mc mr←bch⊃⌽'├┼┤' '|+|'               ⍝ middle─┼×┼─centre
           ll lc lr←bch⊃⌽'└┴┘' ''''                ⍝ lower──┘ └──right
           vt hz←bch⊃⌽'│─' '|-'                    ⍝ vertical and horizontal.
-     
+
           box←{                                   ⍝ Recursive boxing of nested array.
               isor ⍵:⎕FMT⊂⍵                       ⍝ ⎕or: '∇name'.
               1=≡,⍵:dec open ⎕PP ∆FMT1 dec open ⍵     ⍝ simple array: format.
@@ -412,7 +412,7 @@
               subs←aligned ∇¨mat                  ⍝ aligned boxed subarrays.
               (≢⍴⍵)gaps ⍵ plane subs              ⍝ collection into single plane.
           }
-     
+
           aligned←{                               ⍝ Alignment and centring.
               rows cols←sepr⍴¨⍵                   ⍝ subarray dimensions.
               sizes←(⌈/rows)∘.,⌈⌿cols             ⍝ aligned subarray sizes.
@@ -420,7 +420,7 @@
               v h←sepr⌈0.5×↑(⍴¨⍵)-sizes           ⍝ vertical and horizontal rotation.
               v⊖¨h⌽¨sizes↑¨⍵                      ⍝ centred aligned subarrays.
           }
-     
+
           gaps←{                                  ⍝ Gap-separated sub-planes.
               sep≤⍺≤2:⍵                           ⍝ not separating: done.
               subs←(⍺-1)∇¨⍵                       ⍝ sub-hyperplanes.
@@ -428,52 +428,52 @@
               fill←(⍺ width-3 0)⍴' '              ⍝ inter-plane gap.
               ↑{⍺⍪fill⍪⍵}/1 open subs             ⍝ gap-separated planes.
           }
-     
+
           plane←{                                 ⍝ Boxed rank-2 plane.
               sep∧2<⍴⍴⍺:⍺ join ⍵                  ⍝ gap-separated sub-planes.
               odec←(dec shape ⍺)outer ⍵           ⍝ outer type and shape decoration.
               idec←inner ⍺                        ⍝ inner type and shape decorations.
               (odec,idec)collect ⍵                ⍝ collected, formatted subarrays.
           }
-     
+
           join←{                                  ⍝ Join of gap-separated sub-planes.
               sep←(≢⍵)÷1⌈≢⍺                       ⍝ sub plane separation.
               split←(0=sep|⍳≢⍵)⊂[0]⍵              ⍝ separation along first axis.
               (⊂⍤¯1⊢⍺)plane¨split                 ⍝ sub-plane join.
           }
-     
+
           outer←{                                 ⍝ Outer decoration.
               sizes←1 0{⊃↓(⍉⍣⍺)⍵}¨sepr⍴¨⍵         ⍝ row and col sizes of subarrays.
               sides←sizes/¨¨vt hz                 ⍝ vert and horiz cell sides.
               bords←dec↓¨ml uc glue¨sides         ⍝ joined up outer borders.
               ↑,¨/(ul'')⍺ bords(ll ur)            ⍝ vertical and horizontal borders.
           }
-     
+
           inner←{                                 ⍝ Inner subarray decorations.
               deco←{(type ⍵),1 shape ⍵}           ⍝ type and shape decorators.
               sepr deco¨matr dec open ⍵           ⍝ decorators: tt vv hh .
           }
-     
+
           collect←{                               ⍝ Collected subarrays.
               lft top tt vv hh←⍺                  ⍝ array and subarray decorations.
               cells←vv right 1 open tt hh lower ⍵ ⍝ cells boxed right and below.
               boxes←(dec∨0∊⍴⍵)open cells          ⍝ opened to avoid ,/⍬ problem.
               lft,top⍪↑⍪⌿,/boxes                  ⍝ completed collection.
           }
-     
+
           right←{                                 ⍝ Border right each subarray.
               types←2⊥¨(⍳⍴⍵)=⊂¯1+⍴⍵               ⍝ right border lower corner types.
               chars←mc mr lc lr[types]            ⍝    ..     ..      ..      chars.
               rgt←{⍵,(-≢⍵)↑(≢⍵)1 1/vt,⍺}          ⍝ form right border.
               ((matr 1 open ⍺),¨chars)rgt¨⍵       ⍝ cells bordered right.
           }
-     
+
           lower←{                                 ⍝ Border below each subarray.
               bot←{⍵⍪(-1⊃⍴⍵)↑⍺ split ⍵}           ⍝ lower border.
               split←{((¯2+1⊃⍴⍵)/hz)glue ⍺}        ⍝ decorators split with horiz line.
               (matr↑,¨/⍺)bot¨matr ⍵               ⍝ cells bordered below.
           }
-     
+
           type←{                                  ⍝ Type decoration char.
               dec<|≡⍵:hz                          ⍝ nested: '─'
               isor ⍵:'∇'                          ⍝ ⎕or:    '∇'
@@ -484,7 +484,7 @@
               0=≡⍵:sst ⍵                          ⍝ simple scalar: type.
               {(1=⍴⍵)⊃'+'⍵}∪,sst¨dec open ⍵       ⍝ array: mixed or uniform type.
           }
-     
+
           shape←{                                 ⍝ Row and column shape decorators.
               dec≤0=⍴⍴⍵:⍺/¨vt hz                  ⍝ no decoration or scalar.
               cols←(×¯1↑⍴⍵)⊃'⊖→'                  ⍝ zero or more cols.
@@ -492,13 +492,13 @@
               rows←(¯1+3⌊⍴⍴⍵)⊃vt rsig'⍒'          ⍝ high rank decorator overrides.
               rows cols                           ⍝ shape decorators.
           }
-     
+
           matr←{↑,↓⍵}                             ⍝ matrix from non-scalar array.
           sepr←{+/¨1⊂↑⍵}                          ⍝ vec-of-mats from mat-of-vecs.
           open←{16::(1⌈⍴⍵)⍴⊂'[ref]' ⋄ (⍺⌈⍴⍵)⍴⍵}   ⍝ stretched to expose nulls.
           isor←{1 ⍬≡(≡⍵)(⍴⍵)}                     ⍝ is ⎕or of object?
           glue←{0=⍴⍵:⍵ ⋄ ↑⍺{⍺,⍺⍺,⍵}/⍵}            ⍝ ⍵ interspersed with ⍺s.
-     
+
           isor ⍵:⎕FMT⊂⍵                           ⍝ simple ⎕OR: done.
           1=≡,⍵:⎕PP ∆FMT1 ⍵                           ⍝ simple array: done.
           box ⍵                                   ⍝ recursive boxing of array.
@@ -507,9 +507,9 @@
       display←{⎕IO ⎕ML←0                              ⍝ Boxed display of array.
           ⍺←⍬ ⋄ ch ⎕PP←2↑⍺,(⍴,⍺)↓1 ⎕PP                ⍝ default chars and precision
           chars←ch⊃'..''''|-' '┌┐└┘│─'                ⍝ ⍺: 0-clunky, 1-smooth.
-     
+
           tl tr bl br vt hz←chars                     ⍝ Top left, top right, ...
-     
+
           box←{                                       ⍝ Box with type and axes.
               vrt hrz←(¯1+⍴⍵)⍴¨vt hz                  ⍝ Vert. and horiz. lines.
               top←(hz,'⊖→')[¯1↑⍺],hrz                 ⍝ Upper border with axis.
@@ -519,7 +519,7 @@
               lft←⍉tl,(↑lax),bl                       ⍝ ... and corners.
               lft,(top⍪⍵⍪bot),rgt                     ⍝ Fully boxed array.
           }
-     
+
           deco←{⍺←type open ⍵ ⋄ ⍺,axes ⍵}             ⍝ Type and axes vector.
           axes←{(-2⌈⍴⍴⍵)↑1+×⍴⍵}                       ⍝ Array axis types.
           open←{16::(1⌈⍴⍵)⍴⊂'[ref]' ⋄ (1⌈⍴⍵)⍴⍵}       ⍝ Expose null axes.
@@ -527,7 +527,7 @@
           type←{{(1=⍴⍵)⊃'+'⍵}∪,char¨⍵}                ⍝ Simple array type.
           char←{⍬≡⍴⍵:hz ⋄ (⊃⍵∊'¯',⎕D)⊃'#~'}∘⍕         ⍝ Simple scalar type.
           line←{(6≠10|⎕DR' '⍵)⊃' -'}                  ⍝ underline for atom.
-     
+
           {                                           ⍝ Recursively box arrays:
               0=≡⍵:' '⍪(open ⎕FMT ⍵)⍪line ⍵           ⍝ Simple scalar.
               1 ⍬≡(≡⍵)(⍴⍵):'∇' 0 0 box ⎕FMT ⍵         ⍝ Object rep: ⎕OR.
@@ -546,7 +546,7 @@
 ⍝ Support for ]defs and ]boxing:
 
       nabs←{                              ⍝ Name abstraction:
-     
+
           subs←{                          ⍝ substitution of ⍵-names in ⍺-defns
               dfns←(⊃∘(⊃⌽)¨⍺)∊'{'         ⍝ mask of ⍺'s dfns
               vars←(⊃¨1↓¨⍺)∊2             ⍝ mask of ⍺'s vars
@@ -560,7 +560,7 @@
               zipd←{↓⍉↑⍺⍺↓⍉↑⍵}            ⍝ under zipping: [N K D] ←→ [N][K][D]
               sub1 foldl∘libs zipd srch ⍺ ⍝ largest-to-smallest search of lib defns
           }                               ⍝ :: [N K D] ← [N K D] ∇ [N K D]
-     
+
           sub1←{                          ⍝ defns ⍺ with name of library defn ⍵
               (Ns Ks Ds)(N K D)←⍺ ⍵       ⍝ accumulated defns, next library defn
               depth←|≡K                   ⍝ depth of kind-tree of sought item
@@ -572,17 +572,17 @@
               srch←trav¨@{~Ns∊⊂N}         ⍝ search of all but self :: [K D] ← ∇ [K D]
               (⊂Ns),↓⍉↑srch↓⍉↑Ks Ds       ⍝ name replacement
           }                               ⍝ :: [N][K][D] ← [N][K][D] ∇ N K D
-     
+
           uvals←{                         ⍝ mask of non-duplicated items
               grps←⊢∘⊂⌸⍵                  ⍝ value groups
               uniqs←∊(1=≢¨grps)/grps      ⍝ indices of unique values
               (⍳≢⍵)∊uniqs                 ⍝ non-duplicated items
           }                               ⍝ :: [?] ← ∇ [⍺]
-     
+
           curried←{1 0≡(|⊃⌽⍵)∊4}          ⍝ is curried: lft(dop rgt)?
           join←{l(d r)←⍵ ⋄ l d r}         ⍝ rejoining:  lft(dop rgt) → lft dop rgt
           uncurry←curried currying join   ⍝ reversion to triples for derived fns
-     
+
           kd←{0=≡⍵:⍵ ⋄ 3+4≡⊃⍵}            ⍝ kind from kind-tree
           nkd0←{1↓(⊂'' 0 ⍬),⍵}            ⍝ explicit prototypical item
           kinds←(⍺⍺>1 0 0 1)/2 3 4 9      ⍝ ⍺⍺: 0:none, 1:3 4, 2:2 3 4 9
@@ -590,7 +590,7 @@
           ⍺←⊃¨(3 4,(⍺⍺>1)/2 9)from ⍵      ⍝ default all names
           nkds←nkd0 ⍵[(⊃¨⍵)⍳(,¨⊆⍺)∩⊃¨⍵]   ⍝ subject NKDs
           uncurry¨nkds subs kinds from ⍵  ⍝ with names for values
-     
+
     ⍝ :: [N K D] ← [N](A ∇∇)[N K D] ⍝ name-abstraction:
     ⍝ N := ⍞                        ⍝   Name: char vector
     ⍝ K := 2 | 3 | 4 | 9 | [K]      ⍝   Kind-tree: nested kinds
@@ -599,7 +599,7 @@
       }
 
       nkds←{                              ⍝ (Name Kind Defn)-tuples
-     
+
           defs←{                          ⍝ defns from space ⍵
               Ns←~∘' '¨↓⍵.⎕NL 2 3 4 9     ⍝ all names
               Ks←⍵.(183⌶)¨Ns              ⍝ unofficial: all kind-trees
@@ -609,7 +609,7 @@
               Ds←v@{(kd¨Ks)∊2 9}⊢ds       ⍝ all definitions
               ↓⍉↑Ns Ks Ds                 ⍝ names kind-trees defns
           }                               ⍝ :: [N K D] ← ∇ S
-     
+
           prep←{                          ⍝ preparation of ⎕cr forms
               (⊂⍺)∊0 2 9:⍵                ⍝ array operand: ignore
               1 1≡(≡⍵),⍴⍵:⊃⍵              ⍝ named primitive fn: disclose of 1-vector
@@ -623,13 +623,13 @@
                   1↓,(,∨\named)/⍵         ⍝ without 'name←'
               }⍵                          ⍝ for definition ⍵
           }                               ⍝ :: D ← K ∇ D
-     
+
           derived←{0 1 0≡⍵∊4}             ⍝ is derived?: lft dop rgt
           sepr←{l d r←⍵ ⋄ l(d r)}         ⍝ separation: lft dop rgt → lft(dop rgt)
           curry←derived currying sepr     ⍝ currying of dyadic derived fns
-     
+
           curry¨defs ⍵                    ⍝ (name kinds defn)-tuples
-     
+
     ⍝   :: [N K D] ← ∇ space        ⍝ Name Kind Defn
     ⍝ N := ⍞                        ⍝   Name: char vector
     ⍝ K := 2 | 3 | 4 | 9 | [K]      ⍝   Kind-tree: nested kinds
@@ -645,9 +645,9 @@
       }
 
       expr←{                                  ⍝ Linear representation of expression ⍵.
-     
+
           ⍺←1 0 ⋄ N P←⍺,(≢⍺)↓0 0              ⍝ N:names P:parenthesised
-     
+
           xpr←{K←|⊃k D←⍵                      ⍝ expression from nested defns
               cfmt←⎕SE.Dyalog.Utils.repObj    ⍝ char format
               (⊂K)∊2 9:⍺ cfmt⍣(k>0)⊢D         ⍝ array component
@@ -659,20 +659,20 @@
               pns←(0≠≡¨¯1↓K),0                ⍝ leading non-simple tines
               ⍺ pp⊃join/(P∨pns∧exp)∇¨↓⍉↑⍵     ⍝ joined with parentheses ⍺
           }                                   ⍝ :: ⍞ ← ? ∇ K D
-     
+
           join←({(0≤⎕NC⍪⍵)/⍵}⎕AV~'⍺⍵∇'){      ⍝ join of expressions
               adj←(⊢/⊣),(⊣/⊢)                 ⍝ adjoining: last of ⍺, first of ⍵
               gap←∧/(⍺ adj ⍵)∊⍺⍺,'¯',⎕D       ⍝ gap required between words ⍺ ⍵
               ∊1 gap 1/⍺' '⍵                  ⍝ separated sections
           }                                   ⍝ :: expr ← expr ∇ expr
-     
+
           name←{(↓⌽↑⌽¨⍺),¨(⊂' ← '),¨⍵}⍣N      ⍝ with "name ← ..."
-     
+
           ↑(⊃¨⍵)name 0 xpr¨¯2↑¨⍵              ⍝ formatted definitions
       }
 
       externs←{                               ⍝ External names referenced by fn ⍵.
-     
+
           exts←{                              ⍝ external references
               1≠≡⍵:⍺ ∇ foldl ⍵,⊂,'⋄'          ⍝ inner fn: traverse
               X L P←⍺                         ⍝ Externals Locals Pending
@@ -682,7 +682,7 @@
               ~(⊃⍵)∊'⋄:':⍺                    ⍝ more in segment: continue
               (X∪P)L ⍬                        ⍝ end-of-segment: pending → external
           }                                   ⍝ :: [envt] ← [envt] ∇ func
-     
+
           nest←{                              ⍝ nested tokens for nested functions
               ⍺←+\1 ¯1 0[(,¨'{}')⍳⍵]          ⍝ {}-nesting depths
               outer←⊃,(⊃⌽)                    ⍝ outermost tokens
@@ -694,35 +694,35 @@
               cut←1++\lft∨rgt                 ⍝ chopping at inner {} sections
               ⊃,/(cut⊆⍺)∇¨sort cut⊆⍵          ⍝ diamond and guard segs
           }                                   ⍝ :: func ← ∇ [tokn]
-     
+
           sort←{                              ⍝ inner functions deferred until last
               ord←⍋⊃¨⍺                        ⍝ depth-of-segment order
               deps←(⊂ord)⌷⍺                   ⍝ depths
               segs←(⊂ord)⌷⍵                   ⍝ code segments
               deps ⍺⍺ segs                    ⍝ nesting per segment
           }                                   ⍝ :: func ← [[deps]] ∇ [[toks]]
-     
+
           clean←{                             ⍝ de-fluffing of tokens vectors
               join←{¯1↓⊃,/⍵,¨⊂⊂,'⋄'}          ⍝ diamonds for newlines
               rmcm←{('⍝'≠⊃¨⍵)/⍵}              ⍝ without comments
               rmps←~∘(,¨'()')                 ⍝ without parens: '(a b)←' → 'a b←'
               ''glue foldl rmps rmcm join ⍵   ⍝ clean token vector
           }                                   ⍝ :: [tokn] ← ∇ [[tokn]]
-     
+
           glue←{                              ⍝ gluing of compound name tokens a.b.c
               '.'≠⊃⊃⌽⍺:⍺,⊂⍵                   ⍝ not a '.' token: continue
               ~(⊃⍵)∊alph:⍺,⊂⍵                 ⍝ not a dotted name: continue
               (¯2↓⍺),⊂∊(¯2↑⍺),⍵               ⍝ dotted name: 'a.' 'b' → 'a.b'
           }                                   ⍝ :: [tokn] ← [tokn] ∇ tokn
-     
+
           foldl←{⊃⍺⍺⍨/(⌽⍵),⊂⍺}                ⍝ fold left
-     
+
           alph←{(0≤⎕NC⍪⍵)/⍵}⎕AV~'⍺⍵∇'         ⍝ start-of-name chars
-     
+
           envt←⍬ ⍬ ⍬                          ⍝ Externs Locals Pending
           ⍺←0 ⋄ toks←60⌶,¨,⊆⎕NR⍣(~⍺)⊢⍵,⍺↑'⋄'  ⍝ unofficial: tokens from nested rep'n of function
           ⊃envt exts foldl nest clean toks    ⍝ external names
-     
+
     ⍝ 0 externs :: [name] ← ∇ name      ⍝ names referenced by dfn ⍵
     ⍝ 1 externs :: [name] ← ∇ func      ⍝ names referenced by ⎕CR form ⍵
     ⍝      func := [tokn] | [func]      ⍝ function body: nested tokens vectors
@@ -796,7 +796,7 @@
       exprs,←⊂'0.0007125 0.000735 0.0007575 0.00078 0.0008025 0.000825 0.0008475 0.0008625'
       exprs,←⊂'0.0007125 0.0007125 0.000735 0.0007575 0.00078 0.0008025 0.000825 0.0008475 0.0008625'
       exprs,←⊂'0.0007125 0.0007125 0.0007125 0.000735 0.0007575 0.00078 0.0008025 0.000825 0.0008475 0.0008625'
-     
+
       Match←{⎕FR←⊃1287 645⌽⍨1289=⎕DR ⍺ ⋄ 0::0 ⋄ ⍺≡⍵}
       :For ⎕IO :In 0 1
           :For ⎕FR :In 645 1287
@@ -814,7 +814,7 @@
 
       repObj←{ ⍝ String representation of object V0.35
       ⍝ Optional left arg: parenthesise if needed to isolate expression in context
-     
+
           ⎕IO←1
 
           ⍺←0 ⍝ parenthesise if expression
@@ -838,28 +838,28 @@
               (rc ref)←2↑⍺
               or←scal∧1=≡R←⍵   ⍝ normally no funny objects like ⎕ORs
               or∨9=⎕NC'R':ref{~⍺:⎕SIGNAL⊂('EN' 11)('Message' 'Cannot represent refs') ⋄ ⍵}⍕⍵     ⍝ display refs as they are
-     
+
 ⍝ Reduce object to 1 item if all same elements
               mod←(0<rank)∧(n=0)∨(5×char)<n←×/s
               mod←mod∧as←char{0∊⍴⍵:1 ⋄ 11::0 ⋄ ⍵∧.≡1↑⍵}obj←,⍵ ⍝ as: all the same (Mantis 18499)
               obj←mod{16::⊂'[ref]' ⋄ 1(↑⍣⍺)⍵}obj  ⍝ take only 1st? (grab prototype if empty)
               shape←mod{⍵≡,1:',' ⋄ (⍺∨1<⍴⍵)/'⍴',⍨⍕⍵}s
               shape←shape,(encl←simple<as)⍴'⊂'
-     
-     
+
+
 ⍝ Reduce object to shortest viable prefix
               len←1⍳⍨(obj≡s⍴↑∘obj)¨⍳n
               len<≢obj:P⍣rc⊢(⍕s),'⍴',0 ref ∇ obj⍴⍨len~1
-     
+
 ⍝ Simple scalars and char vector≠⍴1 do not need parens
               parens←rc∧simple≤(0<⍴shape)∨(rank=1)∧num∨{80 82 160 320∊⍨⎕DR ⍵:∨/0 8 10 13 133∊⎕UCS ⍵ ⋄ 0}⍵
               (lp rp)←parens⍴¨'()'
               Paren←{>/'⎕' 'ADÁN'∊¨⍨2↑⍵:P ⍵ ⋄ ⍵} ⍝ Parenthesise complex expressions
               ~simple:rp,⍨lp,shape,encl{⍺⍲'('=1↑⍵:⍵ ⋄ 1↓¯1↓⍵}1↓⊃,/' ',¨Paren¨1 ref∘∇¨obj
-     
+
 ⍝ Simple objects (char should account for ⎕TC chars et al.)
               ⎕PP←34 ⍝ for numbers
-     
+
               cmpv←{⎕DCT←⎕CT←⎕IO←0                    ⍝ compress numeric vector
                   ⎕FR←645 1287[1289≠⎕DR ⍵]       ⍝ outer array may have been nested
                   ∨/e←(0∊s),⍬≡s←⍴v←⍵:⍕e/'⍬',1↑v  ⍝ empty or scalar
@@ -889,7 +889,7 @@
                   ⍵≡⍎fmt:ob,cb,⍨⍕⍵
                   ⎕SIGNAL⊂('EN' 16)('Message' 'Generated expression did not match argument')⍝ NONCE
               }
-     
+
               obj←shape,num ⍺{1↑⍺:cmpv ⍵ ⋄ ⎕ML←1 ⋄ ⎕IO←0 ⋄ QU←{Q,((1+t=Q)/t←⍵),Q←''''}
           ⍝ We have to assume not all characters are available. Those should be:
                   Always←⎕A,⎕D,'abcdefghijklmnopqrstuvwxyz_.,:;%!"/=\-+''#$£¢^¿¡(){}[]§@`∣¶&'
@@ -954,7 +954,7 @@
       ⎕ML←1 ⋄ E←'enclosed' ⍝ for ⊂
      ⍝ Character strings are transformed into a more suitable format
       :Select type←2⊃,mat←'whitespace' 'preserve'⎕XML⍣(0 2∊⍨10|⎕DR string)+string
-     
+
       :CaseList 'array'E
       ⍝ The array could be enclosed several times
           n←2+enc←+/∧\mat[;2]∊⊂E
