@@ -200,8 +200,9 @@
               'EM'EM
               'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message)
           )
-     
-          (⍺.⎕EX'__aplan_input__')⊢⍺.(⍎⎕FX'__aplan_input__←{'⊂⍛,⊆⍵,'}')⍬
+          name←'_'⍴⍨1+⊃⌽⍴⍺.⎕NL-⍳9
+          _←⍺.⎕FX(⊂name,'←{'),⊆⍵,'}'
+          (⍺.⎕EX name)(⍺⍎name)⍬
       }
 
       Deserialise←{ ⍝ Convert text to array
