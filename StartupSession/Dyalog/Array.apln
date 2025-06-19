@@ -188,7 +188,7 @@
           empty←'0\h*⌿'
           member←'([\w∆⍙]|⎕(avu|ct|dct|div|fr|io|ml|pp|rl|rtl|using|wx))+\h*:'
           other←'[][)(⋄¯.⊂⍬,\s]+'
-          remain←string comment exp complex ucs null empty member other ⎕R''⍠1⍠'Mode' 'D'⊢⍵
+          remain←string comment exp complex ucs null empty member other ⎕R''⍠1⍠'Mode' 'D'⍠'UCP'1⊢⍵
           remain←'\{[^{}]*\}'⎕R''⍠'Mode' 'D'⍠'DotAll' 1⍣≡remain ⍝ dfns
           ''≡⎕D~⍨∊remain ⍝ separate step because j/e
       }
