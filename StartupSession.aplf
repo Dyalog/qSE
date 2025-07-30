@@ -1,4 +1,4 @@
- {ok}←StartupSession
+ {StartupSession}←StartupSession
 ⍝ This is a boot-strapping function run when APL starts.
 ⍝ It loads Link and uses that to load other Dyalog and/or user-specified things into  ⎕SE and calls their Run functions.
 ⍝ Then it optionally uses Link to load a directory structure of text files into #.
@@ -8,10 +8,17 @@
 ⍝ ∘ Linking into #: https://help.dyalog.com/latest/#UserGuide/Installation%20and%20Configuration/Configuration%20Parameters/Load.htm
 ⍝ ∘ Link: https://dyalog.github.io/link/latest
 
- ;⎕IO;⎕ML ⍝ sysvars
- ;Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox ⍝ fns
- ;win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep ⍝ vars
- ;exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds
+ :If ⎕SE=⎕THIS
+     '⎕SE.Dyalog.Callbacks'⎕NS⊃⎕SI
+     ⎕SE.Dyalog.Callbacks.StartupSession
+     ⎕SE.Dyalog.Callbacks.⎕EX⊃⎕SI
+     :Return
+ :EndIf
+
+ ⎕SHADOW';'(≠⊆⊢)';⎕IO;⎕ML' ⍝ sysvars
+ ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox' ⍝ fns
+ ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep' ⍝ vars
+ ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
 
  ⎕IO←⎕ML←1
 
@@ -259,7 +266,7 @@ retryDl: :If 0=≢dl
      ⎕SE.SALTUtils.USetup'init' 0
      {}⎕SE.UCMD'box' ⍝ initialise output space so toolbar button works
 
-     ok←1
+     StartupSession←1
  :Else
-     ok←0
+     StartupSession←0
  :EndTrap
