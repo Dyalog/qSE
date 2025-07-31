@@ -10,7 +10,7 @@
 
  :If ⎕SE=⎕THIS
      '⎕SE.Dyalog.Callbacks'⎕NS⊃⎕SI
-     ⎕SE.Dyalog.Callbacks.StartupSession
+     startupSession←⎕SE.Dyalog.Callbacks.StartupSession
      ⎕SE.Dyalog.Callbacks.⎕EX⊃⎕SI
      :Return
  :EndIf
