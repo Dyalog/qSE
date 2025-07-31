@@ -1,4 +1,4 @@
- {StartupSession}←StartupSession
+ {startupSession}←StartupSession
 ⍝ This is a boot-strapping function run when APL starts.
 ⍝ It loads Link and uses that to load other Dyalog and/or user-specified things into  ⎕SE and calls their Run functions.
 ⍝ Then it optionally uses Link to load a directory structure of text files into #.
@@ -266,7 +266,7 @@ retryDl: :If 0=≢dl
      ⎕SE.SALTUtils.USetup'init' 0
      {}⎕SE.UCMD'box' ⍝ initialise output space so toolbar button works
 
-     StartupSession←1
+     startupSession←1
  :Else
-     StartupSession←0
+     startupSession←0
  :EndTrap
