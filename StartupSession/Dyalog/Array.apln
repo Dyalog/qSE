@@ -82,7 +82,7 @@
                               repr,←1↓':'@(<\'←'=⊢)code
                           :EndIf
                       :CaseList 3.3 4.3
-                          xr←ref ∆XR name
+                          xr←ref ##.∆XR name
                           nr←ref.⎕NR name
                           repr,←name,':',{1↓¯1↓⍵}⍣(⍬≢⍴xr)⊢xr(caller Tacit)nr
                       :Else
@@ -94,14 +94,24 @@
                   repr,←cr
               :EndTrap
           :Else
-              11 ⎕SIGNAL⍨'Cannot represent ','instance' 'unscripted class' 'unscripted interface' 'external class' 'external interface' 'unknown object'⊃⍨9.2 9.4 9.5 9.6 9.7⍳nc
+              ⎕SIGNAL⊂(
+                  'EN' 11
+                  'Message'('Cannot represent ',(
+                      'instance'
+                      'unscripted class'
+                      'unscripted interface'
+                      'external class'
+                      'external interface'
+                      'unknown object'
+                  )⊃⍨9.2 9.4 9.5 9.6 9.7⍳nc)
+              )
           :EndSelect
         ∇
           Tacit←{
               2 9∊⍨⊂⍺:⍺⍺ Ser ⍵        ⍝ array
               ⍬≢⍴⍺:∊or,(⍺ ∇¨⍵),(']'/⍨'['≡2⊃⍵),cr  ⍝ derv
               (3 1)(4 1)∊⍨⊂⍺,≢⍵:⍵  ⍝ primitive
-              0=≢⍵:11 ⎕SIGNAL⍨'Cannot represent external or locked functions'
+              0=≢⍵:⎕SIGNAL⊂('EN' 11 ⋄ 'Message' 'Cannot represent external or locked functions')
               code←Join⊆⍵
               '}'=⊃⌽⊃⌽⍵:code       ⍝ dfn
               '(∇',code,nl,'∇)'    ⍝ tradfn
@@ -158,11 +168,12 @@
      
           Bad←{(caller code)←⍵
               '+'∊⍺:0
+              11::1
               value←Deserialise caller.{⍺⍺ ⍵}code ⍝ deserialise in caller namespace to have proper ⎕FR
               code≢caller serialise.Ser value  ⍝ serialisation must round-trip
           }
           code←caller serialise.Ser ⍵
-          ⍺ Bad caller code:'It would not be possible to deserialise the generated array notation'⎕SIGNAL 16
+          ⍺ Bad caller code:⎕SIGNAL⊂('EN' 16 ⋄ 'Message' 'It would not be possible to deserialise the generated array notation')
      
           code Format⍨1∊⍺
       }
@@ -216,7 +227,7 @@
           w←↓⍣(2=≢⍴⍵)⊢⍵                  ⍝ if mat, make nested
           w←~⍤∊∘(⎕UCS 10 13)⍛⊆⍣(∨/⍵∊⍨⎕UCS 10 13)⊢w ⍝ if simple, make simple
      
-          beSafe>Safe w:⎕SIGNAL⊂('EN' 11)('Message' 'Unsafe array notation')
+          beSafe>Safe w:⎕SIGNAL⊂('EN' 11 ⋄ 'Message' 'Unsafe array notation')
      
                                 ⍝ fall back to APL model on error
           model<execute:caller ∇{2::⍵ ⍺⍺⍨¯2,⍺ ⋄ ⍺ ∆APLAN,⍵}w
@@ -247,10 +258,10 @@
               ⍵
           }
      
-          ErrIfEmpty←{⍵⊣'Array doesn''t have a prototype'⎕SIGNAL 11/⍨(0=≢⍵)}
+          ErrIfEmpty←{⍵⊣⎕SIGNAL(0=≢⍵)/⊂('EN' 11 ⋄ 'Message' 'Array does not have a prototype')}
      
           SubParse←{
-              ('})]'⍳⊃⌽⍵)≠('{(['⍳⊃⍵):'Bad bracketing'⎕SIGNAL 2
+              ('})]'⍳⊃⌽⍵)≠('{(['⍳⊃⍵):⎕SIGNAL⊂('EN' 2 ⋄ 'Message' 'Bad bracketing')
               (a w)←(1↓¯1∘↓)¨(⍺-1)⍵
               '['=⊃⍵:Paren'{⎕ML←1⋄↑⍵}1/¨',Paren ErrIfEmpty a Parse w ⍝ high-rank
               ':'∊⍵/⍨(1=⍺)×~≠\q=⍵:a Namespace w ⍝ ns
@@ -262,9 +273,9 @@
      
           ParseLine←{
               c←⍵⍳':'
-              1≥≢(c↓⍵)~' ':'Missing value'⎕SIGNAL 6
+              1≥≢(c↓⍵)~' ':⎕SIGNAL⊂('EN' 6 ⋄ 'Message' 'Missing value')
               name←c↑⍵
-              (SysVar⍱¯1≠⎕NC)name:'Invalid name'⎕SIGNAL 2
+              (SysVar⍱¯1≠⎕NC)name:⎕SIGNAL⊂('EN' 2 ⋄ 'Message' 'Invalid name')
               name(name,'←',⍺ Parse Over((c+1)↓⊢)⍵)
           }
      
@@ -299,8 +310,8 @@
           w/⍨←{(∨\⍵)∧⌽∨\⌽⍵}33≤⎕UCS w     ⍝ strip leading/trailing non-printables
      
           pl←ParenLev w
-          (0≠⊢/pl)∨(∨/0>pl):'Unmatched brackets'⎕SIGNAL 2
-          ∨/(pl=0)×SepMask w:'Multi-line input'⎕SIGNAL 11
+          (0≠⊢/pl)∨(∨/0>pl):⎕SIGNAL⊂('EN' 2 ⋄ 'Message' 'Unmatched brackets')
+          ∨/(pl=0)×SepMask w:⎕SIGNAL⊂('EN' 11 ⋄ 'Message' 'Multi-line input')
           caller Execute⍣execute⊢pl Parse w ⍝ materialise namespace as child of calling namespace
       }
 
