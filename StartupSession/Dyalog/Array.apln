@@ -225,7 +225,7 @@
      
           ⍝ Make normalised simple vector:
           w←↓⍣(2=≢⍴⍵)⊢⍵                  ⍝ if mat, make nested
-          w←~⍤∊∘(⎕UCS 10 13)⍛⊆⍣(∨/⍵∊⍨⎕UCS 10 13)⊢w ⍝ if simple, make simple
+          w←~⍤∊∘(⎕UCS 10 13)⍛⊆⍣(∨/⍵∊⍨⎕UCS 10 13)⊢w ⍝ if simple, make nested
      
           beSafe>Safe w:⎕SIGNAL⊂('EN' 11 ⋄ 'Message' 'Unsafe array notation')
      
