@@ -103,7 +103,7 @@ retryDl: :If 0=≢dl
              {}5178⌶⊃⎕SI ⍝ forget self
          :EndIf
 
-         :For pre dir :InEach ('Link' 'Dyalog')(dl ds)
+         :For pre dir :InEach ('Link' 'Dyalog')(dl dyalog)
              dir←∊1 ⎕NPARTS dir,'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
