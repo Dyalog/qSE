@@ -19,7 +19,7 @@
  ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox;Log' ⍝ fns
  ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;type;osSep' ⍝ vars
  ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
- ⎕SHADOW';'(≠⊆⊢)';dsr;tasks;secs;shell;bars;log;times'
+ ⎕SHADOW';'(≠⊆⊢)';dsr;tasks;secs;shell;bars;log;times;cmd'
 
  ⎕IO←⎕ML←1
 
@@ -106,7 +106,17 @@ retryDl: :If 0=≢dl
              log←0⍴⊂''
              Log←{log,←⊂⍵,⍨⊃'%ISO%.fff ─ '∆DT 1 ⎕DT'J'}
              Log'fetching process start time :-)'
-             log,⍨←⊂' ─ from interpreter launch until first APL code runs',⍨⊃⊃⊃⎕SHELL'(Get-Date (Get-Process -id ',∆SYSTEM.Process.Id⍕⍛,').StartTime).ToString(''yyyy-MM-ddTHH:mm:ss.fff'')'
+             :Select 3↑∆SYSTEM.Executable.BuildTarget
+             :Case 'win'
+                 cmd←'(Get-Date (Get-Process -id ',∆SYSTEM.Process.Id⍕⍛,').StartTime).ToString(''yyyy-MM-ddTHH:mm:ss.fff'')'
+             :Case 'lin'
+                 cmd←'pid=',∆SYSTEM.Process.Id⍕⍛,'; awk -v hz=$(getconf CLK_TCK) -v boot=$(date -d "$(uptime -s)" +%s) ''{printf "%.3f\n", boot + $22/hz}'' /proc/$pid/stat | xargs -I{} date -d @{} +"%Y-%m-%dT%H:%M:%S.%3N"'
+             :Case 'mac'
+                 cmd←'date -j -f "%a %b %e %T %Y" "$(ps -p ',∆SYSTEM.Process.Id⍕⍛,' -o lstart= | xargs)" "+%Y-%m-%dT%H:%M:%S.000"'
+             :Case 'aix'
+                 cmd←'perl -MPOSIX -e ''$e=`ps -p ',∆SYSTEM.Process.Id⍕⍛,'`; chomp $e; print strftime("%Y-%m-%dT%H:%M:%S.000\n", localtime(time-$e));'''
+             :EndSelect
+             log,⍨←,∘' ─ from interpreter launch until first APL code runs'¨⊃⊃⎕SHELL cmd
          :EndIf
      :EndSection
 
