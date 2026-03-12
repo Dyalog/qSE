@@ -16,9 +16,10 @@
  :EndIf
 
  ⎕SHADOW';'(≠⊆⊢)';⎕IO;⎕ML' ⍝ sysvars
- ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox' ⍝ fns
- ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep' ⍝ vars
- ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;dd;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
+ ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox;Log' ⍝ fns
+ ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;type;osSep' ⍝ vars
+ ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
+ ⎕SHADOW';'(≠⊆⊢)';dsr;tasks;secs;shell;bars;log;times'
 
  ⎕IO←⎕ML←1
 
@@ -28,8 +29,10 @@
  :EndIf
 
  :Trap '1'∊Env'DYALOGSTARTUPDEBUG' ⍝ If DYALOGSTARTUPDEBUG, only trap WS FULL
+     ∆DT←1200⌶
      AutoStatus←2036⌶
      MsgBox←3503⌶
+     ∆SYSTEM←4075⌶⍬
      NoSlash←{⍵↓⍨-'/\'∊⍨⊃⌽⍵} ⍝ remove trailing (back)slash
      Cut←≠⊆⊢
      FullMsg←{⍵.(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⊆⍺}Message{⍵,⍺,⍨': '/⍨×≢⍺}⊃⍬⍴DM,⊂'')}
@@ -96,6 +99,15 @@ retryDl: :If 0=≢dl
          :EndIf
          dsx←Env'DYALOGSTARTUP_X'
          load←NoSlash Env'LOAD'
+
+         :If 0=≢dsr←Env'DYALOGSTARTUPREPORT'
+             Log←{}
+         :Else
+             log←0⍴⊂''
+             Log←{log,←⊂⍵,⍨⊃'%ISO%.fff ─ '∆DT 1 ⎕DT'J'}
+             Log'fetching process start time :-)'
+             log,⍨←⊂' ─ from interpreter launch until first APL code runs',⍨⊃⊃⊃⎕SHELL'(Get-Date (Get-Process -id ',∆SYSTEM.Process.Id⍕⍛,').StartTime).ToString(''yyyy-MM-ddTHH:mm:ss.fff'')'
+         :EndIf
      :EndSection
 
      :Section a_Populate_Session_Object from $DYALOG/StartupSession/*/*.apl?
@@ -104,6 +116,7 @@ retryDl: :If 0=≢dl
          :EndIf
 
          :For pre dir :InEach ('Link' 'Dyalog')(dl dd)
+             Log'importing ⎕SE.',pre,' from "',dir,'"'
              dir←∊1 ⎕NPARTS dir,'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
@@ -156,6 +169,7 @@ retryDl: :If 0=≢dl
                      :Else
                          ⎕EX fullns
                          fulldir←dir NJoin subdir
+                         Log'importing ',fullns,' from "',fulldir,'"'
                          opts←⎕SE.Link.U.DefaultOpts ⍬
                          opts.codeExtensions~←'apl' 'mipage'
                          :If dskl ⍝ proper link or just import?
@@ -180,6 +194,7 @@ retryDl: :If 0=≢dl
          :EndFor
      :EndSection
 
+     Log'booting SALT from "',salt,'"'
      :Section b_Boot_SALT
          :Trap 0
              :If loadSALT
@@ -206,6 +221,7 @@ retryDl: :If 0=≢dl
          :If ~dsx
              run/⍨←3=40 ⎕ATX(⊃,'.Run'⍨)¨run ⍝ which ns.Run functions exist?
              :For ns dir :In run
+                 Log'calling ',ns⍕⍛,'.Run from "',dir,'"'
                  :Trap 0
                      :Select 11 40 ⎕ATX fn←ns,'.Run' ⍝ valence,type
                      :Case 0 3 ⍝ niladic function
@@ -229,6 +245,7 @@ retryDl: :If 0=≢dl
          :If 0≠≢load ⍝ LOAD allows linking/importing one dir into # at startup
          :AndIf ⎕NEXISTS load
          :AndIf 1=1 ⎕NINFO load ⍝ handle if dir (file is handled by interpreter)
+             Log'importing "',load,'" into #'
              :If 0≠⎕NC'⎕SE.Link'
                  :Select exe
                  :CaseList 'Development' 'DLL'
@@ -263,6 +280,7 @@ retryDl: :If 0=≢dl
 
      {}AutoStatus as
 
+     Log'calling ⎕SE.SALTUtils.USetup and initialising ⎕SE.Dyalog.Out'
      ⎕SE.SALTUtils.USetup'init' 0
      {}⎕SE.UCMD'box' ⍝ initialise output space so toolbar button works
 
@@ -270,3 +288,20 @@ retryDl: :If 0=≢dl
  :Else
      startupSession←0
  :EndTrap
+ :If 0≠≢dsr
+     Log'StartupSession Finished'
+     secs←1000÷⍨¯2-/11 ⎕DT{⊃⌽'T-,:.'⎕VFI⊃'─'∘≠⍛⊆⍵}¨log
+     shell←2⊃secs
+     tasks←' ─ (.*)'⎕S' seconds \1'⊢¯1↓log
+     (secs tasks)/⍨←⊂2≠⍳≢tasks
+     secs,←+/secs ⋄ tasks,←⊂' SECONDS IN TOTAL (excluding',(2⍕shell),' seconds for fetching process start time)'
+     :If ∆SYSTEM.Executable.Unicode
+         bars←↑(,∘×⎕UCS⍤⌿9608+0,8-⊢)⌿0 8⊤⌊0.5+8×secs
+     :Else
+         bars←/∘'⎕'⍤0⌊0.5+secs
+     :EndIf
+     times←'=== %ISO%.fff"Z" ==='∆DT 1 ⎕DT'Z'
+     times,←⊂⎕JSON ⎕OPT'Dialect' 'JSON5'⊢∆SYSTEM.Executable
+     times,←tasks,¨⍨↓bars,2⍕⍪secs
+     times⊂⍛⎕NPUT dsr 2
+ :EndIf
