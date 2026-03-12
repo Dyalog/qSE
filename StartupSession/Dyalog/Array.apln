@@ -273,7 +273,7 @@
      
           ParseLine←{
               c←⍵⍳':'
-              1≥≢(c↓⍵)~' ':⎕SIGNAL⊂('EN' 6 ⋄ 'Message' 'Missing value')
+              1≥≢(c↓⍵)~' ':⎕SIGNAL⊂('EN' 2 ⋄ 'Message' 'Value not specified')
               name←c↑⍵
               (SysVar⍱¯1≠⎕NC)name:⎕SIGNAL⊂('EN' 2 ⋄ 'Message' 'Invalid name')
               name(name,'←',⍺ Parse Over((c+1)↓⊢)⍵)
