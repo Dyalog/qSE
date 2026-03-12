@@ -18,7 +18,7 @@
  ⎕SHADOW';'(≠⊆⊢)';⎕IO;⎕ML' ⍝ sysvars
  ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox' ⍝ fns
  ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;dskl;type;osSep' ⍝ vars
- ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
+ ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;dd;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
 
  ⎕IO←⎕ML←1
 
@@ -85,8 +85,8 @@ retryDl: :If 0=≢dl
          :OrIf 1≠1 ⎕NINFO dl
              retryDl Critical'Configuration parameter DYALOGLINK is "',dl,'" which must be an existing directory.'
          :EndIf
-         :If 0=≢ds←⊃⎕NPARTS Env'DYALOGSTARTUP'
-             ds←dyalog
+         :If 0=≢dd←Env'DYALOGDYALOG'
+             dd←dyalog
          :EndIf
          dskl←Env'DYALOGSTARTUPKEEPLINK'
          :If ~dskl⊂⍛∊,¨'' '0' '1'
@@ -103,7 +103,7 @@ retryDl: :If 0=≢dl
              {}5178⌶⊃⎕SI ⍝ forget self
          :EndIf
 
-         :For pre dir :InEach ('Link' 'Dyalog')(dl dyalog)
+         :For pre dir :InEach ('Link' 'Dyalog')(dl dd)
              dir←∊1 ⎕NPARTS dir,'/StartupSession/',pre
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
