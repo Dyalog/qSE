@@ -85,7 +85,7 @@ retryDl: :If 0=≢dl
          :OrIf 1≠1 ⎕NINFO dl
              retryDl Critical'Configuration parameter DYALOGLINK is "',dl,'" which must be an existing directory.'
          :EndIf
-         :If 0=≢dd←Env'DYALOGDYALOG'
+         :If 0=≢dd←Env'DYALOGSTARTUPSESSIONDYALOG'
              dd←dyalog
          :EndIf
          dskl←Env'DYALOGSTARTUPKEEPLINK'
