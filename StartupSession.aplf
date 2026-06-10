@@ -32,7 +32,6 @@
      ∆DT←1200⌶
      AutoStatus←2036⌶
      MsgBox←3503⌶
-     ∆SYSTEM←4075⌶⍬
      NoSlash←{⍵↓⍨-'/\'∊⍨⊃⌽⍵} ⍝ remove trailing (back)slash
      Cut←≠⊆⊢
      FullMsg←{⍵.(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⊆⍺}Message{⍵,⍺,⍨': '/⍨×≢⍺}⊃⍬⍴DM,⊂'')}
@@ -104,17 +103,17 @@ retryDl: :If 0=≢dl
              Log←{}
          :Else
              log←0⍴⊂''
-             Log←{log,←⊂⍵,⍨⊃'%ISO%.fff ─ '∆DT 1 ⎕DT'J'}
+             Log←{log,←⊂⍵,⍨⊃'%ISO%.fff ─ '⎕DT'J'}
              Log'fetching process start time :-)'
-             :Select 3↑∆SYSTEM.Executable.BuildTarget
+             :Select 3↑⎕SYSTEM.Executable.BuildTarget
              :Case 'win'
-                 cmd←'(Get-Date (Get-Process -id ',∆SYSTEM.Process.Id⍕⍛,').StartTime).ToString(''yyyy-MM-ddTHH:mm:ss.fff'')'
+                 cmd←'(Get-Date (Get-Process -id ',⎕SYSTEM.Process.Id⍕⍛,').StartTime).ToString(''yyyy-MM-ddTHH:mm:ss.fff'')'
              :Case 'lin'
-                 cmd←'pid=',∆SYSTEM.Process.Id⍕⍛,'; awk -v hz=$(getconf CLK_TCK) -v boot=$(date -d "$(uptime -s)" +%s) ''{printf "%.3f\n", boot + $22/hz}'' /proc/$pid/stat | xargs -I{} date -d @{} +"%Y-%m-%dT%H:%M:%S.%3N"'
+                 cmd←'pid=',⎕SYSTEM.Process.Id⍕⍛,'; awk -v hz=$(getconf CLK_TCK) -v boot=$(date -d "$(uptime -s)" +%s) ''{printf "%.3f\n", boot + $22/hz}'' /proc/$pid/stat | xargs -I{} date -d @{} +"%Y-%m-%dT%H:%M:%S.%3N"'
              :Case 'mac'
-                 cmd←'date -j -f "%a %b %e %T %Y" "$(ps -p ',∆SYSTEM.Process.Id⍕⍛,' -o lstart= | xargs)" "+%Y-%m-%dT%H:%M:%S.000"'
+                 cmd←'date -j -f "%a %b %e %T %Y" "$(ps -p ',⎕SYSTEM.Process.Id⍕⍛,' -o lstart= | xargs)" "+%Y-%m-%dT%H:%M:%S.000"'
              :Case 'aix'
-                 cmd←'perl -MPOSIX -e ''$e=`ps -p ',∆SYSTEM.Process.Id⍕⍛,'`; chomp $e; print strftime("%Y-%m-%dT%H:%M:%S.000\n", localtime(time-$e));'''
+                 cmd←'perl -MPOSIX -e ''$e=`ps -p ',⎕SYSTEM.Process.Id⍕⍛,'`; chomp $e; print strftime("%Y-%m-%dT%H:%M:%S.000\n", localtime(time-$e));'''
              :EndSelect
              log,⍨←,∘' ─ from interpreter launch until first APL code runs'¨⊃⊃⎕SHELL cmd
          :EndIf
@@ -305,13 +304,13 @@ retryDl: :If 0=≢dl
      tasks←' ─ (.*)'⎕S' seconds \1'⊢¯1↓log
      (secs tasks)/⍨←⊂2≠⍳≢tasks
      secs,←+/secs ⋄ tasks,←⊂' SECONDS IN TOTAL (excluding',(2⍕shell),' seconds for fetching process start time)'
-     :If ∆SYSTEM.Executable.Unicode
+     :If ⎕SYSTEM.Executable.Unicode
          bars←↑(,∘×⎕UCS⍤⌿9608+0,8-⊢)⌿0 8⊤⌊0.5+8×secs
      :Else
          bars←/∘'⎕'⍤0⌊0.5+secs
      :EndIf
      times←'=== %ISO%.fff"Z" ==='∆DT 1 ⎕DT'Z'
-     times,←⊂⎕JSON ⎕OPT'Dialect' 'JSON5'⊢∆SYSTEM.Executable
+     times,←⊂⎕JSON ⎕OPT'Dialect' 'JSON5'⊢⎕SYSTEM.Executable
      times,←tasks,¨⍨↓bars,2⍕⍪secs
      times⊂⍛⎕NPUT dsr 2
  :EndIf
