@@ -27,6 +27,7 @@
  :If '1'∊Env'DYALOGSTARTUPSTOP'
      (1+⊃⎕LC)⎕STOP⊃⎕SI
  :EndIf
+ dsr←Env'DYALOGSTARTUPREPORT'
 
  :Trap '1'∊Env'DYALOGSTARTUPDEBUG' ⍝ If DYALOGSTARTUPDEBUG, only trap WS FULL
      ∆DT←1200⌶
@@ -99,7 +100,7 @@ retryDl: :If 0=≢dl
          dsx←Env'DYALOGSTARTUP_X'
          load←NoSlash Env'LOAD'
 
-         :If 0=≢dsr←Env'DYALOGSTARTUPREPORT'
+         :If 0=≢dsr
              Log←{}
          :Else
              log←0⍴⊂''
