@@ -184,8 +184,8 @@
           'AIX'≢3↑⊃# ⎕WG'APLVersion':¯1↓'''[^'']*''' '\(⋄'⎕R'\0' '('Split ⍺ ∆FMTAPLAN Split ⍵
      
           split←Split ⍵
-          ⍺:string'([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
-          code←string ⎕R'⋄',⊆⍵                         ⍝ remove quoted text first
+          ⍺:,⊂string'([[(]) ⋄ ' ' ⋄ ([])])' '  +'⎕R'&' '\1' ' ⋄\1' ' '⊢3↓∊' ⋄ '∘,¨split
+          code←string ⎕R'⋄'⊢split                      ⍝ remove quoted text first
           fmt←⎕FMT'\[[^][]+\]' '\([^)(]+\)'⎕R''⍣≡code  ⍝ remove bracket contents
           delta←(+/'(['∊⍨fmt)-(+/fmt∊')]')
           ind←+\0(⌊+0,¯1↓⌈)delta
