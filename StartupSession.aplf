@@ -47,8 +47,9 @@
          pats←⍺⊃(,⊂'/*')('/*.dyalog' '/*.apl?')
          pats,¨⍨←⊂NoSlash ⍵
          ~∨/⎕NEXISTS ⎕OPT 1⊢pats:0⍴⊂''
-         (names types)←⊃,¨/0 1 ⎕NINFO ⎕OPT 1⊢pats
-         {(⊂⍋⍵)⌷⍵}names/⍨types=⍺
+         (names types hidden)←⊃,¨/0 1 6 ⎕NINFO ⎕OPT 1⊢pats
+         hidden∨←'.'=2 1∘⊃¨⎕NPARTS names
+         {(⊂⍋⍵)⌷⍵}names/⍨hidden<types=⍺
      }
      NJoin←{
          tail←⍺↑⍨-1⌊≢⍺
