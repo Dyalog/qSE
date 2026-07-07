@@ -4,8 +4,8 @@
 ⍝ Then it optionally uses Link to load a directory structure of text files into #.
 ⍝ Please do not rely on any other current behaviour of this function, as it may change without warning.
 ⍝ For more information about...
-⍝ ∘ Session Initialisation: https://help.dyalog.com/latest/#UserGuide/The%20APL%20Environment/Session%20Initialisation.htm
-⍝ ∘ Linking into #: https://help.dyalog.com/latest/#UserGuide/Installation%20and%20Configuration/Configuration%20Parameters/Load.htm
+⍝ ∘ Session Initialisation: https://docs.dyalog.com/20.0/windows-ui-guide/the-session-object/session-initialisation/
+⍝ ∘ Linking into #: https://docs.dyalog.com/20.0/windows-installation-and-configuration-guide/configuration-parameters/load/
 ⍝ ∘ Link: https://dyalog.github.io/link/latest
 
  :If ⎕SE=⎕THIS
