@@ -56,7 +56,7 @@
      }
      Critical←→{
          ('CLEAR WS'≢⎕WSID)∨''≢Env'LOAD':{→}⍞←⍵ ⍝ message + cut full stack
-         win≤'1'∊Env'DYALOG_NOPOPUPS':⎕OFF 1⊣⎕DL 5⊣⍞←⍵
+         win≤'1'∊Env'DYALOG_NOPOPUPS':⎕OFF 1⊣⎕DL 5⊣⍞←⍵,' Dyalog will close in 5 seconds.'
          lc←⊃1↓⎕LC
          ⍺←lc-1
          r←¯60+MsgBox('⎕SE.StartupSession[',⍺⍕⍛,']')(⍵'' 'Abort startup entirely, Retry to inspect code, or Ignore and cut stack?')'Error'('ABORT' 'RETRY' 'IGNORE')
@@ -138,7 +138,7 @@ retryDl: :If 0=≢dl
                  2 ref.⎕FIX¨preFiles
                  opts←⎕SE.Link.U.DefaultOpts ⍬
                  :If ⊃(z linkv)←OldLink ⍬
-                     Critical'Link version is ',linkv,' but must be 4.0 or newer'
+                     Critical'Link version is ',linkv,' but must be 4.0 or newer.'
                  :EndIf
                  'opts'⎕NS'dir' 'ns'
                  opts.restored←0
@@ -152,7 +152,7 @@ retryDl: :If 0=≢dl
              :Else
                  {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨preFiles
                  :If ⊃(z linkv)←OldLink ⍬
-                     Critical'Link version is ',linkv,' but must be 4.0 or newer'
+                     Critical'Link version is ',linkv,' but must be 4.0 or newer.'
                  :EndIf
              :EndIf
          :EndFor
