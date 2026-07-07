@@ -1,0 +1,109 @@
+:Namespace Config
+
+    ∇ dir←AllVersions;base;w;x;pat ⍝ report current effective path to version agnostic user settings dir
+      x←~w←⊃'Windows'⍷⊃# ⎕WG'APLVersion'
+     
+      pat←'[DYALOG_CONFIG_ALLVERSIONS]' '$XDG_CONFIG_HOME/dyalog/apl' '$HOME/.config/dyalog/apl' '%APPDATA%\dyalog\apl'
+      dir←⎕SE.Dyalog.Utils.ExpandConfig 1 x x w/pat
+      dir⊃⍤~←⊂''
+    ∇
+
+    ∇ dir←ThisVersion;x;w;os;ver;pat ⍝ report current effective path to version specific user settings dir
+      x←~w←⊃'Windows'⍷⊃(os ver)←2↑# ⎕WG'APLVersion'
+     
+      ver(∊2↑≠⊆⊣)←'.'           ⍝ maj.min
+      ver,←'UC'/⍨80 82=⎕DR''    ⍝ U[nicode]/C[lassic]
+      ver,←¯2↑'32',(⍳∘'-'↓⊢)os  ⍝ -bits
+     
+      pat←'[DYALOG_CONFIG_THISVERSION]',⍥⊆'$XDG_CONFIG_HOME/dyalog/apl/' '$HOME/.config/dyalog/apl/' '%APPDATA%\dyalog\apl\',¨⊂ver
+      dir←⎕SE.Dyalog.Utils.ExpandConfig 1 x x w/pat
+      dir⊃⍤~←⊂''
+    ∇
+
+      Ex←{
+          ⍝ {prevVal}←{scope(s)} Ex id
+          ⍝ scope(s): 1=ThisVersion, 2=AllVersions, 3=Both (default)
+          ⍝ Ex 'user-alphabet'
+     
+          0::⎕SIGNAL⊂⎕DMX.('EN'EN ⋄ 'EM'EM ⋄ 'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message))  ⍝ bubble errors
+     
+          ''≢0⌿⍵:⎕SIGNAL⊂('EN' 11)('Message' 'Right argument must be ID')
+          ⍺←3
+          0∊⍺∊1 2 3:⎕SIGNAL⊂('EN' 11)('Message' 'Left argument must be zero or more of 1 2 3')
+          1:r←Set ⍵ ⎕NULL
+      }
+
+      Set←{
+          ⍝ {prevVal}←{scope(s)} Set id newVal
+          ⍝ scope(s): 1=ThisVersion, 2=AllVersions (default), 3=Both
+          ⍝ omit newVal (or use ⎕NULL) to delete configuration
+          ⍝ Set 'user-alphabet' ⎕A
+     
+          0::⎕SIGNAL⊂⎕DMX.('EN'EN ⋄ 'EM'EM ⋄ 'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message))  ⍝ bubble errors
+     
+          rarg←⊆⍵
+          (1≠≢⍴rarg)∨(2≠≢rarg)∨(''≢0⌿⊃rarg):⎕SIGNAL⊂('EN' 11)('Message' 'Right argument must consist of setting name and value')
+          (id newVal)←rarg
+          ⍬≡'^[0-9_a-z]+-[0-9_a-z]+$'⎕S 3⊢id:⎕SIGNAL⊂('EN' 11)('Message' 'ID must be {vendor}-{subject} of digits/lowercase/underscore')
+          ⍺←2
+          0∊⍺∊1 2 3:⎕SIGNAL⊂('EN' 11)('Message' 'Left argument must be zero or more of 1 2 3')
+     
+          
+          r
+          ⍳10
+          
+
+          
+          ←⍺ Get id ⎕NULL
+     
+          PutJSON←{  ⍝ Write verbose JSON of value ⍺ to file ⍵ making any dirs needed
+              ⎕NULL≡⍺:1 ⎕NDELETE ⍵
+              _←3 ⎕MKDIR⊃⎕NPARTS ⍵
+              ⍵ 1 ⎕NPUT⍨1 ⎕JSON⍠'Compact' 0⊢⍺
+          }
+     
+          paths←AllVersions ThisVersion/⍨2 2⊤+/∪⍺
+          paths,¨←⊂'/',id,'.json'
+          1:r←r⊣newVal∘PutJSON¨paths
+      }
+
+      Get←{
+          ⍝ val←[scopes(s)] Get id [defaultVal]
+          ⍝ scope(s): 1=ThisVersion, 2=AllVersions, 3=Merge (default)
+          ⍝ multiple scopes indicates priority
+     
+          0::⎕SIGNAL⊂⎕DMX.('EN'EN ⋄ 'EM'EM ⋄ 'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message))  ⍝ bubble errors
+     
+          non←()  ⍝ unique non-value without prototype
+          ⍺←3
+     
+          rarg←⊂⍣(''≡0⌿⍵)⊢⍵  ⍝ enclose if simple string
+          2<≢rarg:⎕SIGNAL⊂('EN' 11)('Message' 'Right argument must consist of setting name and optionally fallback value')
+          0∊⍺∊1 2 3:⎕SIGNAL⊂('EN' 11)('Message' 'Left argument must be zero or more of 1 2 3')
+          (id defaultVal)←2↑rarg⊆⍛,non
+     
+          ⍬≡'^[0-9_a-z]+-[0-9_a-z]+$'⎕S 3⊢id:⎕SIGNAL⊂('EN' 11)('Message' 'ID must be {vendor}-{subject} of digits/lowercase/underscore')
+     
+     
+          GetJSON5←{  ⍝ Read JSON5 from file ⍵ establishing namespace values in ⍺
+              11::⎕SIGNAL⊂('EN' 11)('Message'(⍵,⎕DMX.Message(⊣↓⍨¯1+⍳)':'))  ⍝ bad JSON
+              ⎕NEXISTS ⍵:0 ⍺.⎕JSON⍠'Dialect' 'JSON5'⊃⎕NGET ⍵
+              non
+          }
+          paths←AllVersions ThisVersion,¨⊂'/',id,'.json'
+          (va vs)←(⊃⎕RSI)GetJSON5¨paths
+     
+          Merge←{(va vs)←⍺ ⍵  ⍝ merge namespace values or return version ⍵ if not both ⍺ and ⍵ are namespaces
+              vars←2=40 ⎕ATX'vs' 'va'
+              ∨/vars,vs va∊non:⊃vs va ⍺/⍨vars,1  ⍝ return first good
+              ⎕NS va vs  ⍝ two namespaces: merge
+          }
+          vm←va Merge vs
+     
+          msg←'No "',id,'" data available',' for this version' ' for all versions' ''⊃⍨3⌊3@(~×)+/∪⍺
+          16::⎕SIGNAL⊂('EN' 6)('Message'msg)
+     
+          ⊃non~⍨vs va vm[⍺],⊂defaultVal
+      }
+
+:EndNamespace
