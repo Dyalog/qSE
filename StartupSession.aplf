@@ -131,7 +131,7 @@ retryDl: :If 0=≢dl
              ref←⍎ns←⍬ ⎕NS⍨'⎕SE.',pre
              preFiles←⊃⎕NINFO⍠1⊢dir,'/*.apl?'
              :If dskl
-                 {2 ref.⎕FIX'file://',⍵}¨preFiles
+                 2 ref.⎕FIX¨preFiles
                  opts←⎕SE.Link.U.DefaultOpts ⍬
                  'opts'⎕NS'dir' 'ns'
                  opts.restored←0
