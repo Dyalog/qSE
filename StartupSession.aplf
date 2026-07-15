@@ -19,7 +19,7 @@
  ⎕SHADOW';'(≠⊆⊢)';Env;Dir;Path;NoSlash;AutoStatus;Cut;FullMsg;NJoin;Critical;MsgBox;Log;OldLink' ⍝ fns
  ⎕SHADOW';'(≠⊆⊢)';win;dirs;dir;root;subdir;files;paths;path;roots;os;ver;envVars;defaults;as;oldlinks;new;z;fulldir;type;osSep' ⍝ vars
  ⎕SHADOW';'(≠⊆⊢)';exe;parent;load;msg;dl;ref;fullns;runs;run;preFiles;pre;opts;dsx;dld;su;ns;fn;dyalog;loadSALT;home;salt;ds'
- ⎕SHADOW';'(≠⊆⊢)';dsr;tasks;secs;shell;bars;log;times;cmd;linkv'
+ ⎕SHADOW';'(≠⊆⊢)';dsr;tasks;secs;shell;bars;log;times;cmd'
 
  ⎕IO←⎕ML←1
 
@@ -67,7 +67,8 @@
          3=r:→  ⍝ cut full stack
      }
      OldLink←{
-         0=40 ⎕ATX'⎕SE.Link.Version':1 'unknown'
+         0=40 ⎕ATX'⎕SE.Link':1 'Link is missing'
+         0=40 ⎕ATX'⎕SE.Link.Version':1 'Unknown Link version'
          (3≥⊃⊃⌽'.'⎕VFI v),⊂v←⎕SE.Link.Version
      }
 
@@ -138,8 +139,8 @@ retryDl: :If 0=≢dl
              :If dskl
                  2 ref.⎕FIX¨preFiles
                  opts←⎕SE.Link.U.DefaultOpts ⍬
-                 :If ⊃(z linkv)←OldLink ⍬
-                     Critical'Link version is ',linkv,' but must be 4.0 or newer.'
+                 :If ⊃(z msg)←OldLink ⍬
+                     Critical msg
                  :EndIf
                  'opts'⎕NS'dir' 'ns'
                  opts.restored←0
@@ -152,8 +153,8 @@ retryDl: :If 0=≢dl
                  ⎕SE.Link.(U.SetLinks Links,{0::⍬ ⋄ Watcher.Watch ⍵})opts ⍝ Watcher might fail
              :Else
                  {2 ref.⎕FIX⊃⎕NGET⍠'ContentType' 'APLCode'⊢⍵ 1}¨preFiles
-                 :If ⊃(z linkv)←OldLink ⍬
-                     Critical'Link version is ',linkv,' but must be 4.0 or newer.'
+                 :If ⊃(z msg)←OldLink ⍬
+                     Critical msg
                  :EndIf
              :EndIf
          :EndFor
