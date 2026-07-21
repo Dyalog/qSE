@@ -24,6 +24,7 @@
           ⍝ {prevVal}←{scope(s)} Ex id
           ⍝ scope(s): 1=ThisVersion, 2=AllVersions, 3=Both (default)
           ⍝ Ex 'user-alphabet'
+          ⍝ prevVal is ⎕NULL if unset
      
           0::⎕SIGNAL⊂⎕DMX.('EN'EN ⋄ 'EM'EM ⋄ 'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message))  ⍝ bubble errors
      
@@ -36,8 +37,9 @@
       Set←{
           ⍝ {prevVal}←{scope(s)} Set id newVal
           ⍝ scope(s): 1=ThisVersion, 2=AllVersions (default), 3=Both
-          ⍝ omit newVal (or use ⎕NULL) to delete configuration
           ⍝ Set 'user-alphabet' ⎕A
+          ⍝ deletes if newVal is ⎕NULL
+          ⍝ prevVal is ⎕NULL if unset
      
           0::⎕SIGNAL⊂⎕DMX.('EN'EN ⋄ 'EM'EM ⋄ 'Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message))  ⍝ bubble errors
      
@@ -48,13 +50,7 @@
           ⍺←2
           0∊⍺∊1 2 3:⎕SIGNAL⊂('EN' 11)('Message' 'Left argument must be zero or more of 1 2 3')
      
-          
-          r
-          ⍳10
-          
-
-          
-          ←⍺ Get id ⎕NULL
+          r←⍺ Get id ⎕NULL
      
           PutJSON←{  ⍝ Write verbose JSON of value ⍺ to file ⍵ making any dirs needed
               ⎕NULL≡⍺:1 ⎕NDELETE ⍵
