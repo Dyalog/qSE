@@ -42,6 +42,7 @@
 ⍝ 2024 06 19 Adam: 00375 Ability for APL code to permanently store values - Remember
 ⍝ 2024 07 29 Adam: [20129] Respect ⎕PP
 ⍝ 2025 12 17 Adam: repObj should only shorten using ⍴ if it makes result shorter
+⍝ 2026 07 27 Adam: [23065] Clear Config error if missing .NET
 
     :Section General
     ⎕IO←⎕ML←1
@@ -103,6 +104,7 @@
               ⍵
           }
           :If loc≡'Registry'
+              ⎕SIGNAL(⊃⎕SYSTEM.Features.DotNet)↓⊂('EN' 6)('Message' '.NET required but not found')
               ⎕USING←'Microsoft.Win32',',Microsoft.Win32.Registry'/⍨1=⊃2250⌶0 ⍝ .NET Core
               hk←Registry⍎'_(\w)'⎕R'\u1'⊃'^HKEY(_\w+)'⎕S'\l1'⊃4070⌶0
               (key name)←param⊂⍨⍸⍣¯1⊢1,⌈/⍸'\'='\',param
