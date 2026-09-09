@@ -1,4 +1,4 @@
-:NameSpace Utils ⍝ V1.551
+:NameSpace Utils ⍝ V1.5511
 ⍝ Namespace containing :Includable utility functions
 ⍝ 2015 11 12 Adam: Auto version + format & layout now handle matrices
 ⍝ 2016 05 29 DanB: added setupKeys and double quotes for JS
@@ -39,6 +39,7 @@
 ⍝ 2023 06 30 Adam: Dynamicise ⎕USING again as the Core value generates error messages in Framework
 ⍝ 2024 01 04 Adam: Make CD be non-shy as promised
 ⍝ 2024 07 29 Adam: [20129] Respect ⎕PP
+⍝ 2026 09 09 Adam: [23189] [23152] repObj stop reshape shortest prefix
 
     :Section General
     ⎕IO←⎕ML←1
