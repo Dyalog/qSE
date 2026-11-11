@@ -100,7 +100,7 @@ retryDl: :If 0=≢dl
 
      :Section a_Populate_Session_Object from $DYALOG/StartupSession/*/*.apl?
          :If ~dskl     ⍝ forget links?
-             {}5178⌶⊃⎕SI ⍝ forget self
+             {}⎕SE.(5178⌶)⊃⎕SI ⍝ forget original
          :EndIf
 
          :For pre dir :InEach ('Link' 'Dyalog')(dl dd)
