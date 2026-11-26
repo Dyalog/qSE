@@ -1,30 +1,29 @@
-Run params;t
-t←(
-''
-'Welcome to Dyalog!'
-''
-'This pane is the interactive Session (REPL) where you enter APL expressions, see results, and issue commands. Things you can do are indented with six spaces. Move the text caret to such lines and press Enter to execute.'
-''
-'To get started, create a link between the workspace (#) and a directory (we''ve suggested one below):'
-''
-'      ]LINK.Create # ',(⊃⌽4070⌶⍬),⊃'/YYYYMMDD.hhmmss'(1200⌶)1 ⎕DT'J'
-''
-'To create a new function "Foo", do:'
-''
-'      ⎕ED''Foo''  ⍝ A window will open; add code (for example "2+2" below "Foo"), then press <Esc> to save and close'
-''
-'Definitions done with ← in the Session are not automatically added to your source directory. To add such, use the ]LINK.Add command:'
-''
-'      matrix←[1 2 3 ⋄ 4 5 6]'
-'      Turn←{⌽⍉⍵}'
-'      ]LINK.Add matrix Turn'
-''
-'To load something you created previously:'
-''
-'      ]LINK.Create # ',{(n t d)←⍵ ⋄ i←⊃⍒d×1=t ⋄ ×i:i⊃n ⋄ (⊃⌽4070⌶⍬),'\myproject'} 0 1 15⎕NINFO⎕OPT 1⊢(⊃⌽4070⌶⍬),'/*'
-''
-'For more info:'
-''
-'      ]Open https://dyalogprod.gos.dyalog.com/learn/dyalog-quick-start/'
-)
-{⎕←⍵}¨⎕SE.Dyalog.Utils.layoutText t
+ Run params;t;home
+ home←⎕SYSTEM.OS.DirectorySeparator,⍨⊃(2 ⎕NQ #'GetEnvironment' 'HOME' ⋄ ⊃⌽4070⌶⍬)~⊂''
+ Fold←{{⎕←⍵}¨⎕SE.Dyalog.Utils.layoutText 1⌽'' '',⍵}
+ Long←{⎕PW←32767 ⋄ ⎕←⍵}
+ Fold(
+     'Welcome to Dyalog!'
+     ''
+     'This pane is the interactive Session (REPL) where you enter APL expressions, see results, and issue commands. Things you can do are indented with six spaces. Move the text caret to such lines and press Enter to execute.'
+     ''
+     'To get started, create a link between the workspace (#) and a directory (we''ve suggested one below):'
+ )
+ Long'      ]LINK.Create # ',home,⊃1 'YYYYMMDD.hhmmss'⎕DT'J'
+ Fold('To create a new function "Foo", do (an Editor window will open; add code like "2+2" below "Foo", then press <Esc> to save and close):'
+     ''
+     '      ⎕ED''Foo'''
+     ''
+     'Definitions done in outside Editor need manual adding to your source directory. Use the ]LINK.Add command:'
+     ''
+     '      matrix←[1 2 3 ⋄ 4 5 6]'
+     '      Turn←{⌽⍉⍵}'
+     '      ]LINK.Add matrix Turn'
+     ''
+     'To load something you created previously:'
+ )
+ Long'      ]LINK.Create # ',⎕SYSTEM.OS.DirectorySeparator@(=∘'/'){(n t d)←⍵ ⋄ i←⊃⍒d×1=t ⋄ ×i:i⊃n ⋄ home,'myproject'}0 1 15 ⎕NINFO ⎕OPT 1⊢home,'*'
+ Fold(
+     'For more info:'
+ )
+ Long'      ]Open https://dyalogprod.gos.dyalog.com/learn/dyalog-quick-start/'
